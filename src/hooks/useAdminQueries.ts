@@ -11,10 +11,6 @@ import {
   createAdmin,
   resetAdminPassword,
   deleteAdmin,
-  Post,
-  User,
-  AdminLog,
-  AdminManagement
 } from '../lib/api';
 
 // Posts Queries
