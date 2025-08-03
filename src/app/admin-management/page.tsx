@@ -53,7 +53,7 @@ export default function AdminManagementPage() {
         } else {
           router.push('/'); // Redirect if not superadmin
         }
-      } catch (error) {
+      } catch {
         router.push('/'); // Redirect on error
       } finally {
         setLoading(false);
@@ -101,8 +101,8 @@ export default function AdminManagementPage() {
       await createAdminMutation.mutateAsync({ email, password });
       setShowCreateModal(false);
       // The query will automatically refetch
-    } catch (error) {
-      console.error('Failed to create admin:', error);
+    } catch {
+      console.error('Failed to create admin');
     }
   };
 
@@ -117,8 +117,8 @@ export default function AdminManagementPage() {
       setShowPasswordModal(false);
       setSelectedAdmin(null);
       // The query will automatically refetch
-    } catch (error) {
-      console.error('Failed to reset password:', error);
+    } catch {
+      console.error('Failed to reset password');
     }
   };
 
@@ -130,8 +130,8 @@ export default function AdminManagementPage() {
       setShowDeleteModal(false);
       setAdminToDelete(null);
       // The query will automatically refetch
-    } catch (error) {
-      console.error('Failed to delete admin:', error);
+    } catch {
+      console.error('Failed to delete admin');
     }
   };
 

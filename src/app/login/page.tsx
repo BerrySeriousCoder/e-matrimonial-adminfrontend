@@ -32,7 +32,7 @@ export default function LoginPage() {
       } else {
         setError(response.message || 'Login failed');
       }
-    } catch (error) {
+    } catch {
       setError('Network error. Please try again.');
     } finally {
       setLoading(false);
