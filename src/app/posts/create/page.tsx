@@ -14,7 +14,7 @@ export default function CreatePostPage() {
     email: '',
     content: '',
     lookingFor: 'bride' as 'bride' | 'groom',
-    duration: 20,
+    duration: 28,
     fontSize: 'default' as 'default' | 'medium' | 'large',
     bgColor: '#ffffff',
   });
@@ -118,9 +118,9 @@ export default function CreatePostPage() {
                 onChange={(e) => handleChange('duration', parseInt(e.target.value))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black"
               >
-                <option value={15} className="text-black">15 Days</option>
-                <option value={20} className="text-black">20 Days</option>
-                <option value={25} className="text-black">25 Days</option>
+                <option value={28} className="text-black">4 Weeks</option>
+                <option value={42} className="text-black">6 Weeks</option>
+                <option value={56} className="text-black">8 Weeks</option>
               </select>
             </div>
 

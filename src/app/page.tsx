@@ -1,7 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { 
   DocumentTextIcon, 
   UsersIcon,
@@ -11,8 +9,6 @@ import Link from 'next/link';
 import { useAdminPosts, useAdminUsers } from '../hooks/useAdminQueries';
 
 export default function Dashboard() {
-  const router = useRouter();
-
   // Fetch statistics
   const { data: postsData } = useAdminPosts({ page: 1 });
   const { data: usersData } = useAdminUsers({ page: 1 });
