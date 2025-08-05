@@ -10,7 +10,8 @@ import {
   ClipboardDocumentListIcon,
   ArrowRightOnRectangleIcon,
   Cog6ToothIcon,
-  ShieldCheckIcon
+  ShieldCheckIcon,
+  FunnelIcon
 } from '@heroicons/react/24/outline';
 import { getAdminToken, removeAdminToken } from '../lib/auth';
 import { getAdminProfile, AdminUser } from '../lib/api';
@@ -189,6 +190,19 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 >
                   <Cog6ToothIcon className="h-5 w-5" />
                   <span>UI Settings</span>
+                </Link>
+              )}
+              {admin?.isSuperadmin && (
+                <Link
+                  href="/search-filters"
+                  className={`flex items-center space-x-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    isActive('/search-filters') 
+                      ? 'text-gray-900 bg-gray-100' 
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                >
+                  <FunnelIcon className="h-5 w-5" />
+                  <span>Search Filters</span>
                 </Link>
               )}
             </nav>
