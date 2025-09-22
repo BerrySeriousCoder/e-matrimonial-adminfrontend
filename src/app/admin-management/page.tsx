@@ -7,6 +7,8 @@ import {
   PlusIcon,
   KeyIcon,
   TrashIcon,
+  EyeIcon,
+  EyeSlashIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 import { useAdminManagement, useCreateAdmin, useResetAdminPassword, useDeleteAdmin, usePrefetchNextPage } from '../../hooks/useAdminQueries';
@@ -24,6 +26,8 @@ export default function AdminManagementPage() {
   const [selectedAdmin, setSelectedAdmin] = useState<AdminManagement | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [adminToDelete, setAdminToDelete] = useState<AdminManagement | null>(null);
+  const [showCreatePassword, setShowCreatePassword] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
   const router = useRouter();
 
   // Always call hooks at the top level
@@ -96,9 +100,10 @@ export default function AdminManagementPage() {
   const handleCreateAdmin = async (formData: FormData) => {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
+    const role = formData.get('role') as 'admin' | 'data_entry';
 
     try {
-      await createAdminMutation.mutateAsync({ email, password });
+      await createAdminMutation.mutateAsync({ email, password, role });
       setShowCreateModal(false);
       // The query will automatically refetch
     } catch {
@@ -187,6 +192,9 @@ export default function AdminManagementPage() {
                   Email
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Role
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Created At
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -212,6 +220,9 @@ export default function AdminManagementPage() {
                   <tr key={admin.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {admin.email}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {admin.role || 'admin'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {format(new Date(admin.createdAt), 'MMM dd, yyyy HH:mm')}
@@ -313,14 +324,37 @@ export default function AdminManagementPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Password
                   </label>
-                  <input
-                    type="password"
+                  <div className="relative">
+                    <input
+                    type={showCreatePassword ? 'text' : 'password'}
                     name="password"
                     required
                     minLength={6}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black"
+                    className="w-full pr-10 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black"
                     placeholder="Enter password"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowCreatePassword((v) => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    aria-label={showCreatePassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showCreatePassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                  </button>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Role
+                  </label>
+                  <select
+                    name="role"
+                    defaultValue="data_entry"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black"
+                  >
+                    <option value="admin">Admin</option>
+                    <option value="data_entry">Data Entry</option>
+                  </select>
                 </div>
                 <div className="flex justify-end space-x-3">
                   <button
@@ -358,14 +392,24 @@ export default function AdminManagementPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     New Password
                   </label>
-                  <input
-                    type="password"
+                  <div className="relative">
+                    <input
+                    type={showResetPassword ? 'text' : 'password'}
                     name="password"
                     required
                     minLength={6}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black"
+                    className="w-full pr-10 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black"
                     placeholder="Enter new password"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowResetPassword((v) => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    aria-label={showResetPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showResetPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                  </button>
+                  </div>
                 </div>
                 <div className="flex justify-end space-x-3">
                   <button

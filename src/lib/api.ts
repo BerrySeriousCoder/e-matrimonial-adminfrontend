@@ -1,4 +1,4 @@
-const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/api`;
+const API_URL = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api`;
 
 export interface AdminLoginData {
   email: string;
@@ -9,6 +9,7 @@ export interface AdminUser {
   id: number;
   email: string;
   isSuperadmin: boolean;
+  role?: 'superadmin' | 'admin' | 'data_entry';
   createdAt: string;
 }
 
@@ -19,9 +20,9 @@ export interface Post {
   userId?: number;
   lookingFor?: 'bride' | 'groom';
   expiresAt?: string;
-  fontSize?: 'default' | 'medium' | 'large';
+  fontSize?: 'default' | 'large';
   bgColor?: string;
-  status: 'pending' | 'published' | 'archived' | 'deleted';
+  status: 'pending' | 'published' | 'archived' | 'deleted' | 'expired' | 'edited';
   createdAt: string;
 }
 
@@ -48,6 +49,7 @@ export interface AdminLog {
 export interface AdminManagement {
   id: number;
   email: string;
+  role?: 'superadmin' | 'admin' | 'data_entry';
   createdAt: string;
 }
 
@@ -116,6 +118,59 @@ export const createAdminPost = async (token: string, data: {
   return response.json();
 };
 
+// Data Entry APIs
+export const getDataEntryPosts = async (
+  token: string,
+  params: { status?: string; search?: string; page?: number }
+) => {
+  const url = new URL(`${API_URL}/data-entry/posts`);
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      url.searchParams.set(key, String(value));
+    }
+  });
+  const response = await fetch(url.toString(), {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.json();
+};
+
+export const createDataEntryPost = async (token: string, data: {
+  email: string;
+  content: string;
+  lookingFor: 'bride' | 'groom';
+  duration: number;
+  fontSize?: 'default' | 'medium' | 'large';
+  bgColor?: string;
+}) => {
+  const response = await fetch(`${API_URL}/data-entry/posts`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(data),
+  });
+  return response.json();
+};
+
+export const updateDataEntryPost = async (token: string, postId: number, data: {
+  content?: string;
+  lookingFor?: 'bride' | 'groom';
+  fontSize?: 'default' | 'medium' | 'large';
+  bgColor?: string;
+}) => {
+  const response = await fetch(`${API_URL}/data-entry/posts/${postId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(data),
+  });
+  return response.json();
+};
+
 // Users Management
 export const getAdminUsers = async (token: string, params: {
   search?: string;
@@ -176,6 +231,7 @@ export const getAdminManagement = async (token: string, params: {
 export const createAdmin = async (token: string, data: {
   email: string;
   password: string;
+  role?: 'admin' | 'data_entry';
 }) => {
   const response = await fetch(`${API_URL}/admin/management`, {
     method: 'POST',

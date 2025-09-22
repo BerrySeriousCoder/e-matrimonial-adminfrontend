@@ -11,6 +11,9 @@ import {
   createAdmin,
   resetAdminPassword,
   deleteAdmin,
+  getDataEntryPosts,
+  createDataEntryPost,
+  updateDataEntryPost,
 } from '../lib/api';
 
 // Posts Queries
@@ -97,6 +100,7 @@ export const useAdminLogs = (params: {
   action?: string;
   adminId?: number;
   page?: number;
+  limit?: number;
 }) => {
   const token = getAdminToken();
   
@@ -127,7 +131,7 @@ export const useCreateAdmin = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (data: { email: string; password: string }) => {
+    mutationFn: (data: { email: string; password: string; role?: 'admin' | 'data_entry' }) => {
       const token = getAdminToken();
       return createAdmin(token!, data);
     },
@@ -200,6 +204,7 @@ export const usePrefetchNextPage = () => {
       action?: string;
       adminId?: number;
       page: number;
+      limit?: number;
     }) => {
       const nextPageParams = { ...params, page: params.page + 1 };
       queryClient.prefetchQuery({
@@ -221,3 +226,40 @@ export const usePrefetchNextPage = () => {
     },
   };
 }; 
+
+// Data Entry Queries
+export const useDataEntryPosts = (params: { status?: string; search?: string; page?: number }) => {
+  const token = getAdminToken();
+  return useQuery({
+    queryKey: ['data-entry-posts', params],
+    queryFn: () => getDataEntryPosts(token!, params),
+    enabled: !!token,
+    staleTime: 2 * 60 * 1000,
+  });
+};
+
+export const useCreateDataEntryPost = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { email: string; content: string; lookingFor: 'bride' | 'groom'; duration: number; fontSize?: 'default' | 'medium' | 'large'; bgColor?: string }) => {
+      const token = getAdminToken();
+      return createDataEntryPost(token!, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['data-entry-posts'] });
+    },
+  });
+};
+
+export const useUpdateDataEntryPost = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ postId, data }: { postId: number; data: { content?: string; lookingFor?: 'bride' | 'groom'; fontSize?: 'default' | 'medium' | 'large'; bgColor?: string } }) => {
+      const token = getAdminToken();
+      return updateDataEntryPost(token!, postId, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['data-entry-posts'] });
+    },
+  });
+};

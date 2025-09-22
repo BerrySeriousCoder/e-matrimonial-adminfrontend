@@ -11,7 +11,8 @@ import {
   ArrowRightOnRectangleIcon,
   Cog6ToothIcon,
   ShieldCheckIcon,
-  FunnelIcon
+  FunnelIcon,
+  ChartBarIcon
 } from '@heroicons/react/24/outline';
 import { getAdminToken, removeAdminToken } from '../lib/auth';
 import { getAdminProfile, AdminUser } from '../lib/api';
@@ -63,13 +64,31 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }, [router, isLoginPage]);
 
   const handleLogout = () => {
-    removeAdminToken();
-    router.push('/login');
+    // Clear auth token and any cached role-dependent state
+    try {
+      removeAdminToken();
+      if (typeof window !== 'undefined') {
+        // Clear potentially stale caches related to admin UI
+        sessionStorage.clear();
+        // Keep other app data in localStorage; remove known admin keys if any later
+      }
+    } catch {}
+    // Hard redirect to ensure a clean state and avoid stale UI flashes
+    if (typeof window !== 'undefined') {
+      window.location.replace('/login');
+    } else {
+      router.push('/login');
+    }
   };
 
   const isActive = (path: string) => {
     return pathname === path;
   };
+
+  // If data_entry user navigates elsewhere, redirect to /data-entry
+  if (!loading && admin?.role === 'data_entry' && pathname !== '/data-entry' && pathname !== '/my-performance' && pathname !== '/login') {
+    router.push('/data-entry');
+  }
 
   // If we're on login page, just render children without layout
   if (isLoginPage) {
@@ -131,28 +150,45 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <HomeIcon className="h-5 w-5" />
                 <span>Dashboard</span>
               </Link>
-              <Link
-                href="/posts"
-                className={`flex items-center space-x-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                  isActive('/posts') 
-                    ? 'text-gray-900 bg-gray-100' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                <DocumentTextIcon className="h-5 w-5" />
-                <span>Posts</span>
-              </Link>
-              <Link
-                href="/users"
-                className={`flex items-center space-x-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                  isActive('/users') 
-                    ? 'text-gray-900 bg-gray-100' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                <UsersIcon className="h-5 w-5" />
-                <span>Users</span>
-              </Link>
+              {admin?.role !== 'data_entry' && (
+                <>
+                  <Link
+                    href="/posts"
+                    className={`flex items-center space-x-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                      isActive('/posts') 
+                        ? 'text-gray-900 bg-gray-100' 
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    }`}
+                  >
+                    <DocumentTextIcon className="h-5 w-5" />
+                    <span>Posts</span>
+                  </Link>
+                  <Link
+                    href="/users"
+                    className={`flex items-center space-x-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                      isActive('/users') 
+                        ? 'text-gray-900 bg-gray-100' 
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    }`}
+                  >
+                    <UsersIcon className="h-5 w-5" />
+                    <span>Users</span>
+                  </Link>
+                </>
+              )}
+              {admin?.role === 'data_entry' && (
+                <Link
+                  href="/data-entry"
+                  className={`flex items-center space-x-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    isActive('/data-entry') 
+                      ? 'text-gray-900 bg-gray-100' 
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                >
+                  <ClipboardDocumentListIcon className="h-5 w-5" />
+                  <span>Data Entry</span>
+                </Link>
+              )}
               {admin?.isSuperadmin && (
               <Link
                 href="/logs"
@@ -203,6 +239,58 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 >
                   <FunnelIcon className="h-5 w-5" />
                   <span>Search Filters</span>
+                </Link>
+              )}
+              {admin?.isSuperadmin && (
+                <Link
+                  href="/payment-config"
+                  className={`flex items-center space-x-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    isActive('/payment-config') 
+                      ? 'text-gray-900 bg-gray-100' 
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                >
+                  <Cog6ToothIcon className="h-5 w-5" />
+                  <span>Payment Config</span>
+                </Link>
+              )}
+              {admin?.isSuperadmin && (
+                <Link
+                  href="/coupons"
+                  className={`flex items-center space-x-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    isActive('/coupons') 
+                      ? 'text-gray-900 bg-gray-100' 
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                >
+                  <DocumentTextIcon className="h-5 w-5" />
+                  <span>Coupons</span>
+                </Link>
+              )}
+              {admin?.role !== 'data_entry' && (
+                <Link
+                  href="/analytics"
+                  className={`flex items-center space-x-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    isActive('/analytics') 
+                      ? 'text-gray-900 bg-gray-100' 
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                >
+                  <ChartBarIcon className="h-5 w-5" />
+                  <span>Analytics</span>
+                </Link>
+              )}
+              {admin?.role === 'data_entry' && (
+                <Link
+                  href="/my-performance"
+                  className={`flex items-center space-x-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    isActive('/my-performance') 
+                      ? 'text-gray-900 bg-gray-100' 
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                >
+                  <ChartBarIcon className="h-5 w-5" />
+                  <span>My Performance</span>
                 </Link>
               )}
             </nav>

@@ -54,6 +54,9 @@ export default function PostsPage() {
       published: 'bg-green-100 text-green-800',
       archived: 'bg-gray-100 text-gray-800',
       deleted: 'bg-red-100 text-red-800',
+      edited: 'bg-orange-100 text-orange-800',
+      expired: 'bg-gray-200 text-gray-700',
+      payment_pending: 'bg-blue-100 text-blue-800',
     };
 
     return (
@@ -113,6 +116,7 @@ export default function PostsPage() {
             >
               <option value="all" className="text-black">All Status</option>
               <option value="pending" className="text-black">Pending</option>
+              <option value="edited" className="text-black">Edited</option>
               <option value="published" className="text-black">Published</option>
               <option value="archived" className="text-black">Archived</option>
               <option value="deleted" className="text-black">Deleted</option>
@@ -193,7 +197,7 @@ export default function PostsPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
-                        {post.status === 'pending' && (
+                        {(post.status === 'pending' || post.status === 'edited') && (
                           <button
                             onClick={() => handleStatusUpdate(post.id, 'published')}
                             disabled={updateStatusMutation.isPending}

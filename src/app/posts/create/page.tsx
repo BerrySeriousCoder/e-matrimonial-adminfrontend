@@ -14,10 +14,13 @@ export default function CreatePostPage() {
     email: '',
     content: '',
     lookingFor: 'bride' as 'bride' | 'groom',
-    duration: 28,
-    fontSize: 'default' as 'default' | 'medium' | 'large',
+    duration: 14 as 14 | 21 | 28, // Updated: 2, 3, 4 weeks
+    fontSize: 'default' as 'default' | 'large', // Updated: removed 'medium'
     bgColor: '#ffffff',
+    couponCode: '', // Added coupon code
   });
+
+  const [currentCharacters, setCurrentCharacters] = useState(0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,19 +35,18 @@ export default function CreatePostPage() {
 
   const handleChange = (field: string, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    if (field === 'content') {
+      setCurrentCharacters(value.toString().length);
+    }
   };
 
+  // Updated color options - only 5 blue and pink shades
   const colorOptions = [
     { name: 'Default White', value: '#ffffff' },
-    { name: 'Light Blue', value: '#f0f8ff' },
-    { name: 'Light Green', value: '#f0fff0' },
-    { name: 'Light Pink', value: '#fff0f5' },
-    { name: 'Light Gray', value: '#f8f8ff' },
-    { name: 'Light Yellow', value: '#f5f5dc' },
-    { name: 'Light Orange', value: '#faf0e6' },
-    { name: 'Light Purple', value: '#f8f0ff' },
-    { name: 'Light Cyan', value: '#f0ffff' },
-    { name: 'Light Salmon', value: '#fff5ee' },
+    { name: 'Light Blue', value: '#e6f3ff' },
+    { name: 'Soft Blue', value: '#cce7ff' },
+    { name: 'Light Pink', value: '#ffe6f0' },
+    { name: 'Soft Pink', value: '#ffcce6' }
   ];
 
   return (
@@ -52,148 +54,191 @@ export default function CreatePostPage() {
       <div className="flex items-center mb-8">
         <Link
           href="/posts"
-          className="flex items-center text-gray-600 hover:text-gray-900 transition-colors mr-4"
+          className="flex items-center text-gray-600 hover:text-gray-900 mr-4"
         >
-          <ArrowLeftIcon className="h-4 w-4 mr-1" />
+          <ArrowLeftIcon className="h-5 w-5 mr-1" />
           Back to Posts
         </Link>
-        <h2 className="text-2xl font-bold text-gray-900">Create New Post</h2>
+        <h1 className="text-2xl font-bold text-gray-900">Create New Post</h1>
       </div>
 
-      <div className="max-w-2xl">
-        <div className="bg-white shadow rounded-lg p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                User Email *
+      <div className="bg-white shadow rounded-lg">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Email Address
+            </label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => handleChange('email', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black"
+              required
+            />
+          </div>
+
+          {/* Content */}
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Content
               </label>
-              <input
-                type="email"
-                required
-                value={formData.email}
-                onChange={(e) => handleChange('email', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-600 text-black"
-                placeholder="user@example.com"
-              />
+              <span className={`text-xs font-medium ${
+                currentCharacters > 200 ? 'text-red-600' : 'text-gray-600'
+              }`}>
+                {currentCharacters} characters
+                {currentCharacters > 200 && (
+                  <span className="text-gray-500"> (200 free + {currentCharacters - 200} paid)</span>
+                )}
+              </span>
             </div>
-
-            {/* Content */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Post Content *
-              </label>
-              <textarea
-                required
-                rows={6}
-                value={formData.content}
-                onChange={(e) => handleChange('content', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-600 text-black"
-                placeholder="Enter the matrimonial post content..."
-              />
-            </div>
-
-            {/* Looking For */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Looking For
-              </label>
-              <select
-                value={formData.lookingFor}
-                onChange={(e) => handleChange('lookingFor', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black"
-              >
-                <option value="bride" className="text-black">Bride</option>
-                <option value="groom" className="text-black">Groom</option>
-              </select>
-            </div>
-
-            {/* Duration */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ad Duration (Days)
-              </label>
-              <select
-                value={formData.duration}
-                onChange={(e) => handleChange('duration', parseInt(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black"
-              >
-                <option value={28} className="text-black">4 Weeks</option>
-                <option value={42} className="text-black">6 Weeks</option>
-                <option value={56} className="text-black">8 Weeks</option>
-              </select>
-            </div>
-
-            {/* Font Size */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Font Size
-              </label>
-              <select
-                value={formData.fontSize}
-                onChange={(e) => handleChange('fontSize', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black"
-              >
-                <option value="default" className="text-black">Default</option>
-                <option value="medium" className="text-black">Medium</option>
-                <option value="large" className="text-black">Large</option>
-              </select>
-            </div>
-
-            {/* Background Color */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Background Color
-              </label>
-              <div className="grid grid-cols-4 gap-2">
-                {colorOptions.map((color) => (
-                  <button
-                    key={color.value}
-                    type="button"
-                    onClick={() => handleChange('bgColor', color.value)}
-                    className={`p-3 rounded-md border-2 transition-colors ${
-                      formData.bgColor === color.value
-                        ? 'border-indigo-500'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                    style={{ backgroundColor: color.value }}
-                    title={color.name}
-                  >
-                    <span className="sr-only">{color.name}</span>
-                  </button>
-                ))}
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                Selected: {colorOptions.find(c => c.value === formData.bgColor)?.name}
-              </p>
-            </div>
-
-            {/* Submit Button */}
-            <div className="flex justify-end space-x-4">
-              <Link
-                href="/posts"
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </Link>
-              <button
-                type="submit"
-                disabled={createPostMutation.isPending}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-              >
-                {createPostMutation.isPending ? 'Creating...' : 'Create Post'}
-              </button>
-            </div>
-
-            {/* Error Message */}
-            {createPostMutation.error && (
-              <div className="text-red-600 text-sm">
-                Error creating post. Please try again.
+            <textarea
+              value={formData.content}
+              onChange={(e) => handleChange('content', e.target.value)}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black ${
+                currentCharacters > 200 
+                  ? 'border-red-300 focus:border-red-600' 
+                  : 'border-gray-300'
+              }`}
+              rows={6}
+              required
+              placeholder="Enter the matrimonial advertisement content..."
+            />
+            {currentCharacters > 200 && (
+              <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded">
+                Characters beyond 200 will be charged at ₹500 per 20 characters
               </div>
             )}
-          </form>
-        </div>
+          </div>
+
+          {/* I am looking for */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              I am looking for
+            </label>
+            <select
+              value={formData.lookingFor}
+              onChange={(e) => handleChange('lookingFor', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black"
+            >
+              <option value="bride" className="text-black">Bride</option>
+              <option value="groom" className="text-black">Groom</option>
+            </select>
+          </div>
+
+          {/* Duration */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Duration (Days)
+            </label>
+            <select
+              value={formData.duration}
+              onChange={(e) => handleChange('duration', parseInt(e.target.value))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black"
+            >
+              <option value={14} className="text-black">2 weeks (14 days)</option>
+              <option value={21} className="text-black">3 weeks (21 days)</option>
+              <option value={28} className="text-black">4 weeks (28 days)</option>
+            </select>
+          </div>
+
+          {/* Font Size */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Font Size
+            </label>
+            <select
+              value={formData.fontSize}
+              onChange={(e) => handleChange('fontSize', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black"
+            >
+              <option value="default" className="text-black">Default</option>
+              <option value="large" className="text-black">Large (+20%)</option>
+            </select>
+          </div>
+
+          {/* Background Color */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Background Color
+            </label>
+            <div className="grid grid-cols-5 gap-2">
+              {colorOptions.map((color) => (
+                <button
+                  key={color.value}
+                  type="button"
+                  onClick={() => handleChange('bgColor', color.value)}
+                  className={`p-3 rounded-md border-2 transition-colors ${
+                    formData.bgColor === color.value
+                      ? 'border-indigo-500'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  style={{ backgroundColor: color.value }}
+                  title={color.name}
+                >
+                  <span className="sr-only">{color.name}</span>
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Selected: {colorOptions.find(c => c.value === formData.bgColor)?.name}
+            </p>
+          </div>
+
+          {/* Coupon Code */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Coupon Code (Optional)
+            </label>
+            <input
+              type="text"
+              value={formData.couponCode}
+              onChange={(e) => handleChange('couponCode', e.target.value)}
+              placeholder="Enter coupon code"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black"
+            />
+          </div>
+
+          {/* Preview */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Preview
+            </label>
+            <div 
+              className="p-4 border rounded-md"
+              style={{ 
+                backgroundColor: formData.bgColor,
+                fontSize: formData.fontSize === 'default' ? '14px' : '18px'
+              }}
+            >
+              <div className="font-serif text-sm leading-relaxed">
+                {formData.content || 'Your post content will appear here...'}
+              </div>
+              <div className="text-xs text-gray-600 mt-2">
+                I am looking for {formData.lookingFor === 'bride' ? 'bride' : 'groom'} | Duration: {formData.duration} days
+              </div>
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <div className="flex justify-end space-x-4">
+            <Link
+              href="/posts"
+              className="px-4 py-2 text-gray-600 hover:text-gray-800"
+            >
+              Cancel
+            </Link>
+            <button
+              type="submit"
+              disabled={createPostMutation.isPending}
+              className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+            >
+              {createPostMutation.isPending ? 'Creating...' : 'Create Post'}
+            </button>
+          </div>
+        </form>
       </div>
     </>
   );
-} 
+}
