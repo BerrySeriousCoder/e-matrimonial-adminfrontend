@@ -28,9 +28,17 @@ interface DataEntryStats {
   active_days: number;
 }
 
+interface AdminUserRow {
+  id: number;
+  email: string;
+  role?: 'superadmin' | 'admin' | 'data_entry';
+  createdAt: string;
+}
+
 export default function AnalyticsPage() {
   const [adminAnalytics, setAdminAnalytics] = useState<AdminAnalytics[]>([]);
   const [dataEntryStats, setDataEntryStats] = useState<DataEntryStats[]>([]);
+  const [dataEntryAdmins, setDataEntryAdmins] = useState<AdminUserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [days, setDays] = useState(30);
@@ -126,6 +134,26 @@ export default function AnalyticsPage() {
     }
   }, [days]);
 
+  const fetchDataEntryAdmins = useCallback(async () => {
+    try {
+      const token = getAdminToken();
+      if (!token) return;
+      const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/management`);
+      // Fetch first page (assumes small admin list). Could add pagination later if needed
+      const res = await fetch(url.toString(), { headers: { 'Authorization': `Bearer ${token}` } });
+      if (res.ok) {
+        const json = await res.json();
+        const rows: AdminUserRow[] = Array.isArray(json?.admins) ? json.admins : Array.isArray(json?.data) ? json.data : [];
+        const onlyDataEntry = rows.filter(r => r.role === 'data_entry');
+        setDataEntryAdmins(onlyDataEntry);
+      } else {
+        console.error('Admin management API error:', res.status, await res.text());
+      }
+    } catch (e) {
+      console.error('Error fetching admin management:', e);
+    }
+  }, []);
+
   const runDailyStatsJob = async () => {
     try {
       const token = getAdminToken();
@@ -154,11 +182,11 @@ export default function AnalyticsPage() {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      await Promise.all([fetchAdminAnalytics(), fetchDataEntryStats()]);
+      await Promise.all([fetchAdminAnalytics(), fetchDataEntryStats(), fetchDataEntryAdmins()]);
       setLoading(false);
     };
     loadData();
-  }, [period, days, fetchAdminAnalytics, fetchDataEntryStats]);
+  }, [period, days, fetchAdminAnalytics, fetchDataEntryStats, fetchDataEntryAdmins]);
 
   const calculateTotals = () => {
     return adminAnalytics.reduce((totals, day) => ({
@@ -341,58 +369,30 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        {/* Data Entry Performance */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Data Entry Employee Performance</h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posts Created</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posts Approved</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posts Rejected</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posts Edited</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg/Day</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Active Days</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {Array.isArray(dataEntryStats) && dataEntryStats.length > 0 ? dataEntryStats.map((employee, index) => (
-                  <tr key={index}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {employee.employee_id}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {employee.total_posts_created}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {employee.total_posts_approved}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {employee.total_posts_rejected}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {employee.total_posts_edited}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {employee.avg_posts_per_day.toFixed(1)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {employee.active_days}
-                    </td>
-                  </tr>
-                )) : (
+        {/* Data Entry Performance - temporarily hidden */}
+        {false && (
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Data Entry Employee Performance</h3>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
                   <tr>
-                    <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">
-                      No data entry performance data available
-                    </td>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posts Created</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posts Approved</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posts Rejected</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posts Edited</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg/Day</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Active Days</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {/* Hidden content retained for future re-enable */}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

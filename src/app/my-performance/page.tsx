@@ -31,7 +31,31 @@ export default function MyPerformancePage() {
 
       if (response.ok) {
         const data = await response.json();
-        setStats(Array.isArray(data.data) ? data.data : []);
+        const rows: DataEntryStats[] = Array.isArray(data.data) ? data.data : [];
+
+        // Group multiple same-day rows into a single daily summary to avoid confusion
+        const grouped: Record<string, DataEntryStats> = {};
+        for (const r of rows) {
+          const dayKey = (r.date || '').split('T')[0] || new Date(r.date).toISOString().split('T')[0];
+          if (!grouped[dayKey]) {
+            grouped[dayKey] = {
+              date: dayKey,
+              postsCreated: 0,
+              postsApproved: 0,
+              postsRejected: 0,
+              postsEdited: 0,
+              totalCharacters: 0,
+            };
+          }
+          grouped[dayKey].postsCreated += r.postsCreated || 0;
+          grouped[dayKey].postsApproved += r.postsApproved || 0;
+          grouped[dayKey].postsRejected += r.postsRejected || 0;
+          grouped[dayKey].postsEdited += r.postsEdited || 0;
+          grouped[dayKey].totalCharacters += r.totalCharacters || 0;
+        }
+
+        const groupedArray = Object.values(grouped).sort((a, b) => b.date.localeCompare(a.date));
+        setStats(groupedArray);
       }
     } catch (error) {
       console.error('Error fetching my performance:', error);
@@ -145,7 +169,7 @@ export default function MyPerformancePage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Posts Rejected</p>
+                <p className="text-sm font-medium text-gray-600">Posts Archived/Deleted</p>
                 <p className="text-2xl font-semibold text-gray-900">{totals.postsRejected}</p>
               </div>
             </div>
@@ -221,7 +245,7 @@ export default function MyPerformancePage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Approved</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rejected</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Archived/Deleted</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Edited</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Characters</th>
                 </tr>
