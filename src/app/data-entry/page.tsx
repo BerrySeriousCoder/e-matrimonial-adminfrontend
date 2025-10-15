@@ -186,7 +186,7 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
   }, [initial]);
 
   const bgColorOptions = [
-    { name: 'White', value: '#ffffff' },
+    { name: 'None', value: '#ffffff' },
     { name: 'Light Blue', value: '#e6f3ff' },
     { name: 'Soft Blue', value: '#cce7ff' },
     { name: 'Light Pink', value: '#ffe6f0' },
@@ -283,7 +283,7 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
 
         <div className="border border-gray-300">
           <div className="px-4 py-3 border-b border-gray-300 bg-gray-50">
-            <h4 className="font-bold text-sm uppercase tracking-wide text-gray-700">Background Color</h4>
+            <h4 className="font-bold text-sm uppercase tracking-wide text-gray-700">Highlight Color</h4>
           </div>
           <div className="p-4">
             <div className="grid grid-cols-5 gap-2">
@@ -303,7 +303,7 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
               ))}
             </div>
             <p className="text-xs text-gray-600 mt-2">
-              Selected: {bgColorOptions.find(b => b.value === bgColor)?.name}
+              Selected highlighter: {bgColorOptions.find(b => b.value === bgColor)?.name}
             </p>
           </div>
         </div>

@@ -42,7 +42,7 @@ export default function CreatePostPage() {
 
   // Updated color options - only 5 blue and pink shades
   const colorOptions = [
-    { name: 'Default White', value: '#ffffff' },
+    { name: 'None', value: '#ffffff' },
     { name: 'Light Blue', value: '#e6f3ff' },
     { name: 'Soft Blue', value: '#cce7ff' },
     { name: 'Light Pink', value: '#ffe6f0' },
@@ -158,10 +158,10 @@ export default function CreatePostPage() {
             </select>
           </div>
 
-          {/* Background Color */}
+          {/* Highlight Color */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Background Color
+              Highlight Color
             </label>
             <div className="grid grid-cols-5 gap-2">
               {colorOptions.map((color) => (
@@ -182,7 +182,7 @@ export default function CreatePostPage() {
               ))}
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              Selected: {colorOptions.find(c => c.value === formData.bgColor)?.name}
+              Selected highlighter: {colorOptions.find(c => c.value === formData.bgColor)?.name}
             </p>
           </div>
 
