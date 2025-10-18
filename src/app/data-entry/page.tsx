@@ -162,8 +162,8 @@ function StatusBadge({ status }: { status: Post['status'] }) {
   return <span className={`px-2 py-0.5 rounded text-xs ${colors[status] || 'bg-gray-100 text-gray-800'}`}>{status}</span>;
 }
 
-type CreatePayload = { email: string; content: string; lookingFor: 'bride' | 'groom'; duration: 14 | 21 | 28; fontSize: 'default' | 'large'; bgColor: string };
-type UpdatePayload = { content: string; lookingFor?: 'bride' | 'groom'; fontSize: 'default' | 'large'; bgColor: string };
+type CreatePayload = { email: string; content: string; lookingFor: 'bride' | 'groom'; duration: 14 | 21 | 28; fontSize: 'default' | 'large'; bgColor: string; icon: string | null };
+type UpdatePayload = { content: string; lookingFor?: 'bride' | 'groom'; fontSize: 'default' | 'large'; bgColor: string; icon?: string | null };
 
 function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (data: CreatePayload | UpdatePayload) => Promise<void> }) {
   const [email, setEmail] = useState(initial?.email || '');
@@ -172,6 +172,7 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
   const [duration, setDuration] = useState<14 | 21 | 28>(14); // Updated: 2, 3, 4 weeks
   const [fontSize, setFontSize] = useState<'default' | 'large'>(initial?.fontSize || 'default'); // Updated: removed 'medium'
   const [bgColor, setBgColor] = useState<string>(initial?.bgColor || '#ffffff');
+  const [icon, setIcon] = useState<string | null>(initial?.icon || null);
   const [currentCharacters, setCurrentCharacters] = useState<number>(initial?.content?.length || 0);
 
   useEffect(() => {
@@ -181,6 +182,7 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
       setLookingFor((initial.lookingFor as 'bride' | 'groom') || '');
       setFontSize(initial.fontSize || 'default');
       setBgColor(initial.bgColor || '#ffffff');
+      setIcon(initial.icon || null);
       setCurrentCharacters(initial.content?.length || 0);
     }
   }, [initial]);
@@ -193,6 +195,16 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
     { name: 'Soft Pink', value: '#ffcce6' },
   ];
 
+  const iconOptions = [
+    { name: 'None', value: null },
+    { name: 'Businessman', value: 'businessman' },
+    { name: 'Doctor', value: 'doctor' },
+    { name: 'IT Professional', value: 'itprofessional' },
+    { name: 'Lawyer', value: 'lawyer' },
+    { name: 'Soldier', value: 'soldier' },
+    { name: 'Teacher', value: 'teacher' }
+  ];
+
   useEffect(() => { setCurrentCharacters(content.length); }, [content]);
 
   return (
@@ -202,9 +214,9 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
         onSubmit={async (e) => {
           e.preventDefault();
           if (initial) {
-            await onSubmit({ content, lookingFor: (lookingFor || undefined) as 'bride' | 'groom' | undefined, fontSize, bgColor });
+            await onSubmit({ content, lookingFor: (lookingFor || undefined) as 'bride' | 'groom' | undefined, fontSize, bgColor, icon });
           } else {
-            await onSubmit({ email, content, lookingFor: lookingFor as 'bride' | 'groom', duration, fontSize, bgColor });
+            await onSubmit({ email, content, lookingFor: lookingFor as 'bride' | 'groom', duration, fontSize, bgColor, icon });
             setEmail(''); setContent(''); setCurrentCharacters(0);
           }
         }}
@@ -245,66 +257,102 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
           </div>
         </div>
 
-        {!initial && (
-          <div className="border border-gray-300">
-            <div className="px-4 py-3 border-b border-gray-300 bg-gray-50">
-              <h4 className="font-bold text-sm uppercase tracking-wide text-gray-700">Ad Duration</h4>
-            </div>
-            <div className="p-4">
-              <select 
-                className="w-full border rounded px-3 py-2 text-sm text-black" 
-                value={duration} 
-                onChange={(e) => setDuration(Number(e.target.value) as 14 | 21 | 28)} 
-                required
-              >
-                <option value={14}>2 weeks</option>
-                <option value={21}>3 weeks</option>
-                <option value={28}>4 weeks</option>
-              </select>
-            </div>
-          </div>
-        )}
-
+        {/* Add-ons Section */}
         <div className="border border-gray-300">
           <div className="px-4 py-3 border-b border-gray-300 bg-gray-50">
-            <h4 className="font-bold text-sm uppercase tracking-wide text-gray-700">Font Size</h4>
+            <h4 className="font-bold text-sm uppercase tracking-wide text-gray-700">Add-ons</h4>
           </div>
           <div className="p-4">
-            <select 
-              className="w-full border rounded px-3 py-2 text-sm text-black" 
-              value={fontSize} 
-              onChange={(e) => setFontSize(e.target.value as 'default' | 'large')}
-            >
-              <option value="default">Default</option>
-              <option value="large">Large (+20%)</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="border border-gray-300">
-          <div className="px-4 py-3 border-b border-gray-300 bg-gray-50">
-            <h4 className="font-bold text-sm uppercase tracking-wide text-gray-700">Highlight Color</h4>
-          </div>
-          <div className="p-4">
-            <div className="grid grid-cols-5 gap-2">
-              {bgColorOptions.map((c) => (
-                <button 
-                  key={c.value} 
-                  type="button" 
-                  onClick={() => setBgColor(c.value)} 
-                  className={`h-10 border transition-colors ${
-                    bgColor === c.value 
-                      ? 'border-black ring-2 ring-blue-500' 
-                      : 'border-gray-300 hover:border-gray-500'
-                  }`} 
-                  style={{ backgroundColor: c.value }} 
-                  title={c.name} 
-                />
-              ))}
+            {/* First row: Duration and Font Size */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Duration {!initial && <span className="text-red-500">*</span>}
+                </label>
+                <select 
+                  className="w-full border rounded px-3 py-2 text-sm text-black" 
+                  value={duration} 
+                  onChange={(e) => setDuration(Number(e.target.value) as 14 | 21 | 28)} 
+                  required={!initial}
+                >
+                  <option value={14}>2 weeks</option>
+                  <option value={21}>3 weeks</option>
+                  <option value={28}>4 weeks</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Font Size
+                </label>
+                <select 
+                  className="w-full border rounded px-3 py-2 text-sm text-black" 
+                  value={fontSize} 
+                  onChange={(e) => setFontSize(e.target.value as 'default' | 'large')}
+                >
+                  <option value="default">Default</option>
+                  <option value="large">Large (+20%)</option>
+                </select>
+              </div>
             </div>
-            <p className="text-xs text-gray-600 mt-2">
-              Selected highlighter: {bgColorOptions.find(b => b.value === bgColor)?.name}
-            </p>
+            
+            {/* Second row: Highlight Color and Icon Selection */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Highlight Color
+                </label>
+                <div className="grid grid-cols-5 gap-2">
+                  {bgColorOptions.map((c) => (
+                    <button 
+                      key={c.value} 
+                      type="button" 
+                      onClick={() => setBgColor(c.value)} 
+                      className={`h-10 border transition-colors ${
+                        bgColor === c.value 
+                          ? 'border-black ring-2 ring-blue-500' 
+                          : 'border-gray-300 hover:border-gray-500'
+                      }`} 
+                      style={{ backgroundColor: c.value }} 
+                      title={c.name} 
+                    />
+                  ))}
+                </div>
+                <p className="text-xs text-gray-600 mt-2">
+                  Selected: {bgColorOptions.find(b => b.value === bgColor)?.name}
+                </p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Icon (+₹100)
+                </label>
+                <div className="relative">
+                  <select 
+                    className="w-full border rounded px-3 py-2 text-sm text-black appearance-none bg-white" 
+                    value={icon || ''} 
+                    onChange={(e) => setIcon(e.target.value || null)} 
+                  >
+                    {iconOptions.map((option) => (
+                      <option key={option.value || 'none'} value={option.value || ''}>
+                        {option.name}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    {icon && (
+                      <img 
+                        src={`/icon/${icon}.svg`} 
+                        alt={`${icon} icon`}
+                        className="w-5 h-5"
+                      />
+                    )}
+                  </div>
+                </div>
+                <p className="text-xs text-gray-600 mt-2">
+                  Selected: {iconOptions.find(i => i.value === icon)?.name || 'None'}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 

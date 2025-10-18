@@ -17,6 +17,7 @@ export default function CreatePostPage() {
     duration: 14 as 14 | 21 | 28, // Updated: 2, 3, 4 weeks
     fontSize: 'default' as 'default' | 'large', // Updated: removed 'medium'
     bgColor: '#ffffff',
+    icon: null as string | null,
     couponCode: '', // Added coupon code
   });
 
@@ -47,6 +48,17 @@ export default function CreatePostPage() {
     { name: 'Soft Blue', value: '#cce7ff' },
     { name: 'Light Pink', value: '#ffe6f0' },
     { name: 'Soft Pink', value: '#ffcce6' }
+  ];
+
+  // Icon options
+  const iconOptions = [
+    { name: 'None', value: null },
+    { name: 'Businessman', value: 'businessman' },
+    { name: 'Doctor', value: 'doctor' },
+    { name: 'IT Professional', value: 'itprofessional' },
+    { name: 'Lawyer', value: 'lawyer' },
+    { name: 'Soldier', value: 'soldier' },
+    { name: 'Teacher', value: 'teacher' }
   ];
 
   return (
@@ -183,6 +195,38 @@ export default function CreatePostPage() {
             </div>
             <p className="text-xs text-gray-500 mt-1">
               Selected highlighter: {colorOptions.find(c => c.value === formData.bgColor)?.name}
+            </p>
+          </div>
+
+          {/* Icon Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Icon (+₹100)
+            </label>
+            <div className="relative">
+              <select
+                value={formData.icon || ''}
+                onChange={(e) => handleChange('icon', e.target.value || null)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black appearance-none bg-white"
+              >
+                {iconOptions.map((option) => (
+                  <option key={option.value || 'none'} value={option.value || ''} className="text-black">
+                    {option.name}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                {formData.icon && (
+                  <img 
+                    src={`/icon/${formData.icon}.svg`} 
+                    alt={`${formData.icon} icon`}
+                    className="w-5 h-5"
+                  />
+                )}
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Selected: {iconOptions.find(i => i.value === formData.icon)?.name || 'None'}
             </p>
           </div>
 
