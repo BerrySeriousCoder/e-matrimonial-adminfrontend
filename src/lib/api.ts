@@ -22,6 +22,7 @@ export interface Post {
   expiresAt?: string;
   fontSize?: 'default' | 'large';
   bgColor?: string;
+  icon?: string | null;
   status: 'pending' | 'published' | 'archived' | 'deleted' | 'expired' | 'edited';
   createdAt: string;
 }

@@ -34,10 +34,10 @@ export default function CreatePostPage() {
     }
   };
 
-  const handleChange = (field: string, value: string | number) => {
+  const handleChange = (field: string, value: string | number | null) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (field === 'content') {
-      setCurrentCharacters(value.toString().length);
+      setCurrentCharacters(value?.toString().length || 0);
     }
   };
 
