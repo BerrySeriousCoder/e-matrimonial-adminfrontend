@@ -12,7 +12,8 @@ import {
   Cog6ToothIcon,
   ShieldCheckIcon,
   FunnelIcon,
-  ChartBarIcon
+  ChartBarIcon,
+  BookOpenIcon
 } from '@heroicons/react/24/outline';
 import { getAdminToken, removeAdminToken } from '../lib/auth';
 import { getAdminProfile, AdminUser } from '../lib/api';
@@ -239,6 +240,19 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 >
                   <FunnelIcon className="h-5 w-5" />
                   <span>Search Filters</span>
+                </Link>
+              )}
+              {admin?.isSuperadmin && (
+                <Link
+                  href="/synonyms"
+                  className={`flex items-center space-x-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    isActive('/synonyms') 
+                      ? 'text-gray-900 bg-gray-100' 
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                >
+                  <BookOpenIcon className="h-5 w-5" />
+                  <span>Synonyms</span>
                 </Link>
               )}
               {admin?.isSuperadmin && (

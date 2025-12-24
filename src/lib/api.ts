@@ -88,14 +88,14 @@ export const getAdminPosts = async (token: string, params: {
   return response.json();
 };
 
-export const updatePostStatus = async (token: string, postId: number, status: string) => {
+export const updatePostStatus = async (token: string, postId: number, status: string, reason?: string) => {
   const response = await fetch(`${API_URL}/admin/posts/${postId}/status`, {
     method: 'PUT',
     headers: { 
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}` 
     },
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ status, reason }),
   });
   return response.json();
 };

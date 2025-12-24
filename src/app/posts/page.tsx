@@ -10,12 +10,24 @@ import { useAdminPosts, useUpdatePostStatus, usePrefetchNextPage } from '../../h
 import { format } from 'date-fns';
 import { Post } from '../../lib/api';
 
+// Utility to strip HTML tags for display
+const stripHtml = (html: string): string => {
+  if (!html) return '';
+  return html.replace(/<[^>]*>/g, '').trim();
+};
+
 export default function PostsPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [showContentModal, setShowContentModal] = useState(false);
+  
+  // Action modal state for archive/delete with reason
+  const [showActionModal, setShowActionModal] = useState(false);
+  const [actionType, setActionType] = useState<'archived' | 'deleted' | null>(null);
+  const [actionPost, setActionPost] = useState<Post | null>(null);
+  const [actionReason, setActionReason] = useState('');
 
   const { data, isLoading, error } = useAdminPosts({
     status: statusFilter === 'all' ? undefined : statusFilter,
@@ -40,12 +52,36 @@ export default function PostsPage() {
     }
   }, [currentPage, statusFilter, search, totalPages, prefetchPosts]);
 
-  const handleStatusUpdate = async (postId: number, newStatus: string) => {
+  const handleStatusUpdate = async (postId: number, newStatus: string, reason?: string) => {
     try {
-      await updateStatusMutation.mutateAsync({ postId, status: newStatus });
+      await updateStatusMutation.mutateAsync({ postId, status: newStatus, reason });
     } catch (error) {
       console.error('Error updating post status:', error);
     }
+  };
+
+  // Open action modal for archive/delete
+  const openActionModal = (post: Post, action: 'archived' | 'deleted') => {
+    setActionPost(post);
+    setActionType(action);
+    setActionReason('');
+    setShowActionModal(true);
+  };
+
+  // Close action modal
+  const closeActionModal = () => {
+    setShowActionModal(false);
+    setActionPost(null);
+    setActionType(null);
+    setActionReason('');
+  };
+
+  // Confirm action with reason
+  const confirmAction = async () => {
+    if (!actionPost || !actionType) return;
+    
+    await handleStatusUpdate(actionPost.id, actionType, actionReason || undefined);
+    closeActionModal();
   };
 
   const getStatusBadge = (status: string) => {
@@ -176,7 +212,7 @@ export default function PostsPage() {
                     <td className="px-6 py-4 text-sm text-gray-900">
                       <div className="max-w-xs">
                         <div className="truncate">
-                        {post.content}
+                        {stripHtml(post.content)}
                         </div>
                         <button
                           onClick={() => {
@@ -208,7 +244,7 @@ export default function PostsPage() {
                         )}
                         {post.status !== 'deleted' && post.status !== 'archived' && (
                           <button
-                            onClick={() => handleStatusUpdate(post.id, 'archived')}
+                            onClick={() => openActionModal(post, 'archived')}
                             disabled={updateStatusMutation.isPending}
                             className="text-gray-600 hover:text-gray-900 disabled:opacity-50 transition-colors"
                           >
@@ -217,7 +253,7 @@ export default function PostsPage() {
                         )}
                         {post.status !== 'deleted' && (
                           <button
-                            onClick={() => handleStatusUpdate(post.id, 'deleted')}
+                            onClick={() => openActionModal(post, 'deleted')}
                             disabled={updateStatusMutation.isPending}
                             className="text-red-600 hover:text-red-900 disabled:opacity-50 transition-colors"
                           >
@@ -323,9 +359,10 @@ export default function PostsPage() {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Content</label>
-                  <div className="mt-1 p-3 bg-gray-50 rounded-md">
-                    <p className="text-sm text-gray-900 whitespace-pre-wrap">{selectedPost.content}</p>
-                  </div>
+                  <div 
+                    className="mt-1 p-3 bg-gray-50 rounded-md text-sm text-gray-900 prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: selectedPost.content }}
+                  />
                 </div>
               </div>
               
@@ -338,6 +375,80 @@ export default function PostsPage() {
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
                 >
                   Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Archive/Delete Action Modal */}
+        {showActionModal && actionPost && actionType && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4">
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-lg font-medium text-gray-900">
+                  {actionType === 'archived' ? 'Archive Post' : 'Delete Post'}
+                </h3>
+                <button
+                  onClick={closeActionModal}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div className={`p-3 rounded-md ${actionType === 'archived' ? 'bg-yellow-50 border border-yellow-200' : 'bg-red-50 border border-red-200'}`}>
+                  <p className={`text-sm ${actionType === 'archived' ? 'text-yellow-800' : 'text-red-800'}`}>
+                    {actionType === 'archived' 
+                      ? 'This will archive the post and notify the user via email.'
+                      : 'This will permanently delete the post and notify the user via email.'}
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Post</label>
+                  <p className="text-sm text-gray-600">ID: {actionPost.id} | Email: {actionPost.email}</p>
+                  <p className="text-sm text-gray-500 truncate mt-1">{stripHtml(actionPost.content)}</p>
+                </div>
+                
+                <div>
+                  <label htmlFor="reason" className="block text-sm font-medium text-gray-700 mb-1">
+                    Reason for {actionType === 'archived' ? 'archiving' : 'deletion'} 
+                    <span className="text-gray-400 font-normal"> (will be sent to user)</span>
+                  </label>
+                  <textarea
+                    id="reason"
+                    rows={3}
+                    value={actionReason}
+                    onChange={(e) => setActionReason(e.target.value)}
+                    placeholder={`Enter the reason for ${actionType === 'archived' ? 'archiving' : 'deleting'} this post...`}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 placeholder:text-gray-400"
+                  />
+                </div>
+              </div>
+              
+              <div className="mt-6 flex justify-end space-x-3">
+                <button
+                  onClick={closeActionModal}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmAction}
+                  disabled={updateStatusMutation.isPending}
+                  className={`px-4 py-2 text-sm font-medium text-white rounded-md focus:outline-none focus:ring-2 disabled:opacity-50 ${
+                    actionType === 'archived'
+                      ? 'bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500'
+                      : 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
+                  }`}
+                >
+                  {updateStatusMutation.isPending 
+                    ? 'Processing...' 
+                    : actionType === 'archived' ? 'Archive Post' : 'Delete Post'}
                 </button>
               </div>
             </div>

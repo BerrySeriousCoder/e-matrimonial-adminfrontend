@@ -9,6 +9,12 @@ import { useAdminUsers, useUserPosts, usePrefetchNextPage } from '../../hooks/us
 import { format } from 'date-fns';
 import { User, Post } from '../../lib/api';
 
+// Utility to strip HTML tags for display
+const stripHtml = (html: string): string => {
+  if (!html) return '';
+  return html.replace(/<[^>]*>/g, '').trim();
+};
+
 export default function UsersPage() {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -225,7 +231,7 @@ export default function UsersPage() {
                           <strong>Status:</strong> {post.status}
                         </div>
                         <div className="text-sm text-gray-600 max-h-32 overflow-y-auto">
-                          <strong>Content:</strong> {post.content}
+                          <strong>Content:</strong> {stripHtml(post.content)}
                         </div>
                         <div className="text-xs text-gray-500 mt-2">
                           Created: {format(new Date(post.createdAt), 'MMM dd, yyyy')}

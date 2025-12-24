@@ -1,10 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useCreateAdminPost } from '../../../hooks/useAdminQueries';
+
+// Dynamic import to prevent SSR issues with Tiptap
+const RichTextEditor = dynamic(() => import('../../../components/RichTextEditor'), { ssr: false });
+
+// Utility to strip HTML tags for character counting
+const stripHtml = (html: string): string => {
+  if (!html) return '';
+  return html.replace(/<[^>]*>/g, '').trim();
+};
 
 export default function CreatePostPage() {
   const router = useRouter();
@@ -25,7 +35,7 @@ export default function CreatePostPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       await createPostMutation.mutateAsync(formData);
       router.push('/posts');
@@ -37,7 +47,7 @@ export default function CreatePostPage() {
   const handleChange = (field: string, value: string | number | null) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (field === 'content') {
-      setCurrentCharacters(value?.toString().length || 0);
+      setCurrentCharacters(stripHtml(value?.toString() || '').length);
     }
   };
 
@@ -96,26 +106,19 @@ export default function CreatePostPage() {
               <label className="block text-sm font-medium text-gray-700">
                 Content
               </label>
-              <span className={`text-xs font-medium ${
-                currentCharacters > 200 ? 'text-red-600' : 'text-gray-600'
-              }`}>
+              <span className={`text-xs font-medium ${currentCharacters > 200 ? 'text-red-600' : 'text-gray-600'
+                }`}>
                 {currentCharacters} characters
                 {currentCharacters > 200 && (
                   <span className="text-gray-500"> (200 free + {currentCharacters - 200} paid)</span>
                 )}
               </span>
             </div>
-            <textarea
+            <RichTextEditor
               value={formData.content}
-              onChange={(e) => handleChange('content', e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black ${
-                currentCharacters > 200 
-                  ? 'border-red-300 focus:border-red-600' 
-                  : 'border-gray-300'
-              }`}
-              rows={6}
-              required
+              onChange={(html) => handleChange('content', html)}
               placeholder="Enter the matrimonial advertisement content..."
+              className={currentCharacters > 200 ? 'border-red-300' : ''}
             />
             {currentCharacters > 200 && (
               <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded">
@@ -181,11 +184,10 @@ export default function CreatePostPage() {
                   key={color.value}
                   type="button"
                   onClick={() => handleChange('bgColor', color.value)}
-                  className={`p-3 rounded-md border-2 transition-colors ${
-                    formData.bgColor === color.value
+                  className={`p-3 rounded-md border-2 transition-colors ${formData.bgColor === color.value
                       ? 'border-indigo-500'
                       : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                    }`}
                   style={{ backgroundColor: color.value }}
                   title={color.name}
                 >
@@ -217,8 +219,8 @@ export default function CreatePostPage() {
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                 {formData.icon && (
-                  <img 
-                    src={`/icon/${formData.icon}.svg`} 
+                  <img
+                    src={`/icon/${formData.icon}.svg`}
                     alt={`${formData.icon} icon`}
                     className="w-5 h-5"
                   />
@@ -249,9 +251,9 @@ export default function CreatePostPage() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Preview
             </label>
-            <div 
+            <div
               className="p-4 border rounded-md"
-              style={{ 
+              style={{
                 backgroundColor: formData.bgColor,
                 fontSize: formData.fontSize === 'default' ? '14px' : '18px'
               }}

@@ -36,9 +36,9 @@ export const useUpdatePostStatus = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: ({ postId, status }: { postId: number; status: string }) => {
+    mutationFn: ({ postId, status, reason }: { postId: number; status: string; reason?: string }) => {
       const token = getAdminToken();
-      return updatePostStatus(token!, postId, status);
+      return updatePostStatus(token!, postId, status, reason);
     },
     onSuccess: () => {
       // Invalidate and refetch posts

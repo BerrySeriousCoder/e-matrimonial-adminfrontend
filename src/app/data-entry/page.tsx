@@ -1,10 +1,20 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { getAdminToken } from '../../lib/auth';
 import { getAdminProfile, Post } from '../../lib/api';
 import { useDataEntryPosts, useCreateDataEntryPost, useUpdateDataEntryPost } from '../../hooks/useAdminQueries';
+
+// Dynamic import to prevent SSR issues with Tiptap
+const RichTextEditor = dynamic(() => import('../../components/RichTextEditor'), { ssr: false });
+
+// Utility to strip HTML tags for character counting
+const stripHtml = (html: string): string => {
+  if (!html) return '';
+  return html.replace(/<[^>]*>/g, '').trim();
+};
 
 export default function DataEntryPage() {
   const router = useRouter();
@@ -130,7 +140,7 @@ export default function DataEntryPage() {
                     (data?.posts || []).map((p: Post) => (
                       <tr key={p.id} className="border-b">
                         <td className="py-2 pr-2 whitespace-nowrap text-black">{p.email}</td>
-                        <td className="py-2 pr-2 max-w-md truncate text-black">{p.content}</td>
+                        <td className="py-2 pr-2 max-w-md truncate text-black">{stripHtml(p.content)}</td>
                         <td className="py-2 pr-2"><StatusBadge status={p.status} /></td>
                         <td className="py-2 pr-2 whitespace-nowrap text-black">{new Date(p.createdAt).toLocaleString()}</td>
                         <td className="py-2 pr-2">
@@ -205,7 +215,7 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
     { name: 'Teacher', value: 'teacher' }
   ];
 
-  useEffect(() => { setCurrentCharacters(content.length); }, [content]);
+  useEffect(() => { setCurrentCharacters(stripHtml(content).length); }, [content]);
 
   return (
     <div className="space-y-4">
@@ -227,12 +237,12 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
               <h4 className="font-bold text-sm uppercase tracking-wide text-gray-700">Customer Email</h4>
             </div>
             <div className="p-4">
-              <input 
-                className="w-full border rounded px-3 py-2 text-sm text-black" 
-                type="email" 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
-                required 
+              <input
+                className="w-full border rounded px-3 py-2 text-sm text-black"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
                 placeholder="Enter customer email address"
               />
             </div>
@@ -244,10 +254,10 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
             <h4 className="font-bold text-sm uppercase tracking-wide text-gray-700">I am looking for</h4>
           </div>
           <div className="p-4">
-            <select 
-              className="w-full border rounded px-3 py-2 text-sm text-black" 
-              value={lookingFor} 
-              onChange={(e) => setLookingFor(e.target.value as 'bride' | 'groom' | '')} 
+            <select
+              className="w-full border rounded px-3 py-2 text-sm text-black"
+              value={lookingFor}
+              onChange={(e) => setLookingFor(e.target.value as 'bride' | 'groom' | '')}
               required={!initial}
             >
               <option value="">Select</option>
@@ -269,10 +279,10 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Duration {!initial && <span className="text-red-500">*</span>}
                 </label>
-                <select 
-                  className="w-full border rounded px-3 py-2 text-sm text-black" 
-                  value={duration} 
-                  onChange={(e) => setDuration(Number(e.target.value) as 14 | 21 | 28)} 
+                <select
+                  className="w-full border rounded px-3 py-2 text-sm text-black"
+                  value={duration}
+                  onChange={(e) => setDuration(Number(e.target.value) as 14 | 21 | 28)}
                   required={!initial}
                 >
                   <option value={14}>2 weeks</option>
@@ -284,9 +294,9 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Font Size
                 </label>
-                <select 
-                  className="w-full border rounded px-3 py-2 text-sm text-black" 
-                  value={fontSize} 
+                <select
+                  className="w-full border rounded px-3 py-2 text-sm text-black"
+                  value={fontSize}
                   onChange={(e) => setFontSize(e.target.value as 'default' | 'large')}
                 >
                   <option value="default">Default</option>
@@ -294,7 +304,7 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
                 </select>
               </div>
             </div>
-            
+
             {/* Second row: Highlight Color and Icon Selection */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -303,17 +313,16 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
                 </label>
                 <div className="grid grid-cols-5 gap-2">
                   {bgColorOptions.map((c) => (
-                    <button 
-                      key={c.value} 
-                      type="button" 
-                      onClick={() => setBgColor(c.value)} 
-                      className={`h-10 border transition-colors ${
-                        bgColor === c.value 
-                          ? 'border-black ring-2 ring-blue-500' 
+                    <button
+                      key={c.value}
+                      type="button"
+                      onClick={() => setBgColor(c.value)}
+                      className={`h-10 border transition-colors ${bgColor === c.value
+                          ? 'border-black ring-2 ring-blue-500'
                           : 'border-gray-300 hover:border-gray-500'
-                      }`} 
-                      style={{ backgroundColor: c.value }} 
-                      title={c.name} 
+                        }`}
+                      style={{ backgroundColor: c.value }}
+                      title={c.name}
                     />
                   ))}
                 </div>
@@ -321,16 +330,16 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
                   Selected: {bgColorOptions.find(b => b.value === bgColor)?.name}
                 </p>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Icon (+₹100)
                 </label>
                 <div className="relative">
-                  <select 
-                    className="w-full border rounded px-3 py-2 text-sm text-black appearance-none bg-white" 
-                    value={icon || ''} 
-                    onChange={(e) => setIcon(e.target.value || null)} 
+                  <select
+                    className="w-full border rounded px-3 py-2 text-sm text-black appearance-none bg-white"
+                    value={icon || ''}
+                    onChange={(e) => setIcon(e.target.value || null)}
                   >
                     {iconOptions.map((option) => (
                       <option key={option.value || 'none'} value={option.value || ''}>
@@ -340,8 +349,8 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                     {icon && (
-                      <img 
-                        src={`/icon/${icon}.svg`} 
+                      <img
+                        src={`/icon/${icon}.svg`}
                         alt={`${icon} icon`}
                         className="w-5 h-5"
                       />
@@ -360,9 +369,8 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
           <div className="px-4 py-3 border-b border-gray-300 bg-gray-50">
             <div className="flex justify-between items-center">
               <h4 className="font-bold text-sm uppercase tracking-wide text-gray-700">Ad Content</h4>
-              <span className={`text-xs font-medium ${
-                currentCharacters > 200 ? 'text-red-600' : 'text-gray-600'
-              }`}>
+              <span className={`text-xs font-medium ${currentCharacters > 200 ? 'text-red-600' : 'text-gray-600'
+                }`}>
                 {currentCharacters} characters
                 {currentCharacters > 200 && (
                   <span className="text-gray-500"> (200 free + {currentCharacters - 200} paid)</span>
@@ -371,20 +379,14 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
             </div>
           </div>
           <div className="p-4">
-            <textarea 
-              className={`w-full border rounded px-3 py-2 text-sm text-black min-h-[120px] ${
-                currentCharacters > 200 
-                  ? 'border-red-300 focus:border-red-600' 
-                  : 'border-gray-300 focus:border-black'
-              }`} 
-              rows={6} 
-              value={content} 
-              onChange={(e) => {
-                setContent(e.target.value);
-                setCurrentCharacters(e.target.value.length);
-              }} 
-              required 
+            <RichTextEditor
+              value={content}
+              onChange={(html) => {
+                setContent(html);
+                setCurrentCharacters(stripHtml(html).length);
+              }}
               placeholder="Enter the matrimonial advertisement content..."
+              className={currentCharacters > 200 ? 'border-red-300' : ''}
             />
             {currentCharacters > 200 && (
               <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded">
@@ -395,16 +397,16 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
         </div>
 
         <div className="flex gap-2 pt-2">
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
           >
             {initial ? 'Save Changes' : 'Create Post'}
           </button>
           {initial && (
-            <button 
-              type="button" 
-              className="px-3 py-2 border rounded hover:bg-gray-50 transition-colors" 
+            <button
+              type="button"
+              className="px-3 py-2 border rounded hover:bg-gray-50 transition-colors"
               onClick={() => window.location.reload()}
             >
               Cancel
