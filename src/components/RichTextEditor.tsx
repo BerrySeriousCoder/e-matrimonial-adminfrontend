@@ -37,7 +37,7 @@ export default function RichTextEditor({
         },
         editorProps: {
             attributes: {
-                class: 'prose prose-sm focus:outline-none min-h-[110px] px-3 py-2',
+                class: 'prose prose-sm focus:outline-none min-h-[110px] px-3 py-2 text-gray-900',
             },
         },
     });
@@ -60,7 +60,7 @@ export default function RichTextEditor({
                 <button
                     type="button"
                     onClick={() => editor?.chain().focus().toggleBold().run()}
-                    className={`px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-100 transition-colors ${editor?.isActive('bold') ? 'bg-indigo-100 border-indigo-400 font-bold' : 'bg-white'
+                    className={`px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-100 transition-colors text-gray-800 ${editor?.isActive('bold') ? 'bg-indigo-100 border-indigo-400 font-bold' : 'bg-white'
                         }`}
                     title="Bold"
                 >
@@ -69,7 +69,7 @@ export default function RichTextEditor({
                 <button
                     type="button"
                     onClick={() => editor?.chain().focus().toggleItalic().run()}
-                    className={`px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-100 transition-colors ${editor?.isActive('italic') ? 'bg-indigo-100 border-indigo-400' : 'bg-white'
+                    className={`px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-100 transition-colors text-gray-800 ${editor?.isActive('italic') ? 'bg-indigo-100 border-indigo-400' : 'bg-white'
                         }`}
                     title="Italic"
                 >
@@ -78,7 +78,7 @@ export default function RichTextEditor({
                 <button
                     type="button"
                     onClick={() => editor?.chain().focus().toggleUnderline().run()}
-                    className={`px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-100 transition-colors ${editor?.isActive('underline') ? 'bg-indigo-100 border-indigo-400' : 'bg-white'
+                    className={`px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-100 transition-colors text-gray-800 ${editor?.isActive('underline') ? 'bg-indigo-100 border-indigo-400' : 'bg-white'
                         }`}
                     title="Underline"
                 >
@@ -88,7 +88,7 @@ export default function RichTextEditor({
                 <button
                     type="button"
                     onClick={() => editor?.chain().focus().toggleBulletList().run()}
-                    className={`px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-100 transition-colors ${editor?.isActive('bulletList') ? 'bg-indigo-100 border-indigo-400' : 'bg-white'
+                    className={`px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-100 transition-colors text-gray-800 ${editor?.isActive('bulletList') ? 'bg-indigo-100 border-indigo-400' : 'bg-white'
                         }`}
                     title="Bullet List"
                 >
@@ -97,7 +97,7 @@ export default function RichTextEditor({
                 <button
                     type="button"
                     onClick={() => editor?.chain().focus().toggleOrderedList().run()}
-                    className={`px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-100 transition-colors ${editor?.isActive('orderedList') ? 'bg-indigo-100 border-indigo-400' : 'bg-white'
+                    className={`px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-100 transition-colors text-gray-800 ${editor?.isActive('orderedList') ? 'bg-indigo-100 border-indigo-400' : 'bg-white'
                         }`}
                     title="Numbered List"
                 >

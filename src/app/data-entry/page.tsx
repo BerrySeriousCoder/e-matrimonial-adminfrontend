@@ -23,7 +23,7 @@ export default function DataEntryPage() {
   const [query, setQuery] = useState<{ status?: string; search?: string; page?: number }>({ page: 1 });
   const dividerRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [leftWidth, setLeftWidth] = useState<number>(50); // percent
+  const [leftWidth, setLeftWidth] = useState<number>(55); // percent - give editor more space
   const [isResizing, setIsResizing] = useState(false);
 
   useEffect(() => {
@@ -71,12 +71,12 @@ export default function DataEntryPage() {
   if (!authorized) return null;
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-gray-900">Data Entry</h1>
-      <div ref={containerRef} className="relative w-full" style={{ height: 'min(72vh, 800px)' }}>
+    <div className="h-full flex flex-col">
+      <h1 className="text-xl font-semibold text-gray-900 mb-3">Data Entry</h1>
+      <div ref={containerRef} className="relative w-full flex-1" style={{ height: 'calc(100vh - 140px)' }}>
         <div className="h-full flex" style={{ userSelect: isResizing ? 'none' : 'auto' }}>
           {/* Left editor */}
-          <div style={{ width: `${leftWidth}%` }} className="h-full bg-white border rounded-md p-4 overflow-auto">
+          <div style={{ width: `${leftWidth}%` }} className="h-full bg-white border rounded-md p-3 overflow-auto">
             <PostEditor
               key={editingPost?.id || 'new'}
               initial={editingPost || null}
@@ -96,20 +96,20 @@ export default function DataEntryPage() {
           <div
             ref={dividerRef}
             onMouseDown={handleMouseDown}
-            className="h-full w-1 bg-gray-200 hover:bg-gray-300 cursor-col-resize"
+            className="h-full w-1.5 bg-gray-300 hover:bg-blue-400 cursor-col-resize flex-shrink-0"
             style={{ touchAction: 'none' }}
           />
           {/* Right table */}
-          <div style={{ width: `${100 - leftWidth}%` }} className="h-full bg-white border rounded-md p-4 overflow-auto">
-            <div className="flex items-center gap-3 mb-4">
+          <div style={{ width: `${100 - leftWidth}%` }} className="h-full bg-white border rounded-md p-3 flex flex-col">
+            <div className="flex items-center gap-2 mb-2">
               <input
                 placeholder="Search email or text"
-                className="border rounded px-3 py-2 text-sm w-full text-black"
+                className="border rounded px-2 py-1.5 text-sm flex-1 text-black"
                 value={query.search || ''}
                 onChange={(e) => setQuery((q) => ({ ...q, search: e.target.value, page: 1 }))}
               />
               <select
-                className="border rounded px-2 py-2 text-sm text-black"
+                className="border rounded px-2 py-1.5 text-sm text-black"
                 value={query.status || 'all'}
                 onChange={(e) => setQuery((q) => ({ ...q, status: e.target.value, page: 1 }))}
               >
@@ -122,29 +122,33 @@ export default function DataEntryPage() {
                 <option value="expired">Expired</option>
               </select>
             </div>
-            <div className="overflow-auto">
+            <div className="overflow-auto flex-1">
               <table className="min-w-full text-sm">
-                <thead>
+                <thead className="sticky top-0 bg-white">
                   <tr className="text-left border-b text-gray-700">
-                    <th className="py-2 pr-2 font-medium">Email</th>
-                    <th className="py-2 pr-2 font-medium">Content</th>
-                    <th className="py-2 pr-2 font-medium">Status</th>
-                    <th className="py-2 pr-2 font-medium">Created</th>
-                    <th className="py-2 pr-2 font-medium">Actions</th>
+                    <th className="py-1.5 pr-2 font-medium">ID</th>
+                    <th className="py-1.5 pr-2 font-medium">Email</th>
+                    <th className="py-1.5 pr-2 font-medium">Content</th>
+                    <th className="py-1.5 pr-2 font-medium">Status</th>
+                    <th className="py-1.5 pr-2 font-medium">Created</th>
+                    <th className="py-1.5 pr-2 font-medium">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {isLoading ? (
-                    <tr><td className="py-4 text-gray-700" colSpan={5}>Loading...</td></tr>
+                    <tr><td className="py-3 text-gray-700" colSpan={6}>Loading...</td></tr>
+                  ) : (data?.posts || []).length === 0 ? (
+                    <tr><td className="py-3 text-gray-500 text-center" colSpan={6}>No posts found</td></tr>
                   ) : (
                     (data?.posts || []).map((p: Post) => (
-                      <tr key={p.id} className="border-b">
-                        <td className="py-2 pr-2 whitespace-nowrap text-black">{p.email}</td>
-                        <td className="py-2 pr-2 max-w-md truncate text-black">{stripHtml(p.content)}</td>
-                        <td className="py-2 pr-2"><StatusBadge status={p.status} /></td>
-                        <td className="py-2 pr-2 whitespace-nowrap text-black">{new Date(p.createdAt).toLocaleString()}</td>
-                        <td className="py-2 pr-2">
-                          <button className="text-blue-600 hover:underline" onClick={() => setEditingPost(p)}>Edit</button>
+                      <tr key={p.id} className="border-b hover:bg-gray-50">
+                        <td className="py-1.5 pr-2 whitespace-nowrap text-black font-mono text-xs">{p.id}</td>
+                        <td className="py-1.5 pr-2 whitespace-nowrap text-black text-xs">{p.email}</td>
+                        <td className="py-1.5 pr-2 max-w-[200px] truncate text-black text-xs">{stripHtml(p.content)}</td>
+                        <td className="py-1.5 pr-2"><StatusBadge status={p.status} /></td>
+                        <td className="py-1.5 pr-2 whitespace-nowrap text-black text-xs">{new Date(p.createdAt).toLocaleDateString()}</td>
+                        <td className="py-1.5 pr-2">
+                          <button className="text-blue-600 hover:underline text-xs" onClick={() => setEditingPost(p)}>Edit</button>
                         </td>
                       </tr>
                     ))
@@ -152,6 +156,77 @@ export default function DataEntryPage() {
                 </tbody>
               </table>
             </div>
+            {/* Pagination */}
+            {data && data.totalPages > 1 && (
+              <div className="flex items-center justify-between pt-2 border-t mt-2">
+                <span className="text-xs text-gray-600">
+                  {data.total} posts · Page {data.page} of {data.totalPages}
+                </span>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setQuery((q) => ({ ...q, page: 1 }))}
+                    disabled={data.page <= 1}
+                    className="px-2 py-1 text-xs border rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 text-gray-700"
+                    title="First page"
+                  >
+                    ««
+                  </button>
+                  <button
+                    onClick={() => setQuery((q) => ({ ...q, page: (q.page || 1) - 1 }))}
+                    disabled={data.page <= 1}
+                    className="px-2 py-1 text-xs border rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 text-gray-700"
+                    title="Previous page"
+                  >
+                    «
+                  </button>
+                  {/* Page numbers */}
+                  {(() => {
+                    const pages = [];
+                    const current = data.page;
+                    const total = data.totalPages;
+                    let start = Math.max(1, current - 2);
+                    let end = Math.min(total, current + 2);
+                    
+                    // Adjust if we're near the start or end
+                    if (current <= 3) end = Math.min(5, total);
+                    if (current >= total - 2) start = Math.max(1, total - 4);
+                    
+                    for (let i = start; i <= end; i++) {
+                      pages.push(
+                        <button
+                          key={i}
+                          onClick={() => setQuery((q) => ({ ...q, page: i }))}
+                          className={`px-2 py-1 text-xs border rounded ${
+                            i === current
+                              ? 'bg-blue-600 text-white border-blue-600'
+                              : 'hover:bg-gray-100 text-gray-700'
+                          }`}
+                        >
+                          {i}
+                        </button>
+                      );
+                    }
+                    return pages;
+                  })()}
+                  <button
+                    onClick={() => setQuery((q) => ({ ...q, page: (q.page || 1) + 1 }))}
+                    disabled={data.page >= data.totalPages}
+                    className="px-2 py-1 text-xs border rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 text-gray-700"
+                    title="Next page"
+                  >
+                    »
+                  </button>
+                  <button
+                    onClick={() => setQuery((q) => ({ ...q, page: data.totalPages }))}
+                    disabled={data.page >= data.totalPages}
+                    className="px-2 py-1 text-xs border rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 text-gray-700"
+                    title="Last page"
+                  >
+                    »»
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -175,11 +250,27 @@ function StatusBadge({ status }: { status: Post['status'] }) {
 type CreatePayload = { email: string; content: string; lookingFor: 'bride' | 'groom'; duration: 14 | 21 | 28; fontSize: 'default' | 'large'; bgColor: string; icon: string | null };
 type UpdatePayload = { content: string; lookingFor?: 'bride' | 'groom'; fontSize: 'default' | 'large'; bgColor: string; icon?: string | null };
 
+// Helper to calculate duration from createdAt and expiresAt
+const calculateDuration = (createdAt: string, expiresAt?: string): 14 | 21 | 28 => {
+  if (!expiresAt) return 14;
+  const created = new Date(createdAt);
+  const expires = new Date(expiresAt);
+  const diffDays = Math.round((expires.getTime() - created.getTime()) / (1000 * 60 * 60 * 24));
+  if (diffDays >= 25) return 28;
+  if (diffDays >= 18) return 21;
+  return 14;
+};
+
 function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (data: CreatePayload | UpdatePayload) => Promise<void> }) {
   const [email, setEmail] = useState(initial?.email || '');
   const [content, setContent] = useState(initial?.content || '');
   const [lookingFor, setLookingFor] = useState<'bride' | 'groom' | ''>((initial?.lookingFor as 'bride' | 'groom') || '');
-  const [duration, setDuration] = useState<14 | 21 | 28>(14); // Updated: 2, 3, 4 weeks
+  const [duration, setDuration] = useState<14 | 21 | 28>(() => {
+    if (initial?.expiresAt) {
+      return calculateDuration(initial.createdAt, initial.expiresAt);
+    }
+    return 14;
+  });
   const [fontSize, setFontSize] = useState<'default' | 'large'>(initial?.fontSize || 'default'); // Updated: removed 'medium'
   const [bgColor, setBgColor] = useState<string>(initial?.bgColor || '#ffffff');
   const [icon, setIcon] = useState<string | null>(initial?.icon || null);
@@ -190,6 +281,7 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
       setEmail(initial.email || '');
       setContent(initial.content || '');
       setLookingFor((initial.lookingFor as 'bride' | 'groom') || '');
+      setDuration(calculateDuration(initial.createdAt, initial.expiresAt));
       setFontSize(initial.fontSize || 'default');
       setBgColor(initial.bgColor || '#ffffff');
       setIcon(initial.icon || null);
@@ -218,9 +310,9 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
   useEffect(() => { setCurrentCharacters(stripHtml(content).length); }, [content]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <form
-        className="space-y-4"
+        className="space-y-3"
         onSubmit={async (e) => {
           e.preventDefault();
           if (initial) {
@@ -231,71 +323,77 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
           }
         }}
       >
-        {!initial && (
-          <div className="border border-gray-300">
-            <div className="px-4 py-3 border-b border-gray-300 bg-gray-50">
-              <h4 className="font-bold text-sm uppercase tracking-wide text-gray-700">Customer Email</h4>
+        {/* Email and Looking For in one row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="border border-gray-300 rounded">
+            <div className="px-3 py-2 border-b border-gray-300 bg-gray-50">
+              <h4 className="font-bold text-xs uppercase tracking-wide text-gray-700">Customer Email</h4>
             </div>
-            <div className="p-4">
+            <div className="p-2">
               <input
-                className="w-full border rounded px-3 py-2 text-sm text-black"
+                className={`w-full border rounded px-2 py-1.5 text-sm text-black ${initial ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="Enter customer email address"
+                onChange={(e) => !initial && setEmail(e.target.value)}
+                required={!initial}
+                disabled={!!initial}
+                readOnly={!!initial}
+                placeholder="Enter email"
               />
+              {initial && (
+                <p className="text-xs text-gray-500 mt-1">Cannot change when editing</p>
+              )}
             </div>
           </div>
-        )}
 
-        <div className="border border-gray-300">
-          <div className="px-4 py-3 border-b border-gray-300 bg-gray-50">
-            <h4 className="font-bold text-sm uppercase tracking-wide text-gray-700">I am looking for</h4>
-          </div>
-          <div className="p-4">
-            <select
-              className="w-full border rounded px-3 py-2 text-sm text-black"
-              value={lookingFor}
-              onChange={(e) => setLookingFor(e.target.value as 'bride' | 'groom' | '')}
-              required={!initial}
-            >
-              <option value="">Select</option>
-              <option value="bride">Bride</option>
-              <option value="groom">Groom</option>
-            </select>
+          <div className="border border-gray-300 rounded">
+            <div className="px-3 py-2 border-b border-gray-300 bg-gray-50">
+              <h4 className="font-bold text-xs uppercase tracking-wide text-gray-700">Looking for</h4>
+            </div>
+            <div className="p-2">
+              <select
+                className="w-full border rounded px-2 py-1.5 text-sm text-black"
+                value={lookingFor}
+                onChange={(e) => setLookingFor(e.target.value as 'bride' | 'groom' | '')}
+                required={!initial}
+              >
+                <option value="">Select</option>
+                <option value="bride">Bride</option>
+                <option value="groom">Groom</option>
+              </select>
+            </div>
           </div>
         </div>
 
-        {/* Add-ons Section */}
-        <div className="border border-gray-300">
-          <div className="px-4 py-3 border-b border-gray-300 bg-gray-50">
-            <h4 className="font-bold text-sm uppercase tracking-wide text-gray-700">Add-ons</h4>
+        {/* Add-ons Section - more compact */}
+        <div className="border border-gray-300 rounded">
+          <div className="px-3 py-2 border-b border-gray-300 bg-gray-50">
+            <h4 className="font-bold text-xs uppercase tracking-wide text-gray-700">Add-ons</h4>
           </div>
-          <div className="p-4">
-            {/* First row: Duration and Font Size */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div className="p-2">
+            {/* All options in a grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs font-medium text-gray-700 mb-1">
                   Duration {!initial && <span className="text-red-500">*</span>}
                 </label>
                 <select
-                  className="w-full border rounded px-3 py-2 text-sm text-black"
+                  className={`w-full border rounded px-2 py-1.5 text-sm text-black ${initial ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                   value={duration}
-                  onChange={(e) => setDuration(Number(e.target.value) as 14 | 21 | 28)}
+                  onChange={(e) => !initial && setDuration(Number(e.target.value) as 14 | 21 | 28)}
                   required={!initial}
+                  disabled={!!initial}
                 >
                   <option value={14}>2 weeks</option>
                   <option value={21}>3 weeks</option>
                   <option value={28}>4 weeks</option>
                 </select>
+                {initial && <p className="text-xs text-gray-400 mt-0.5">Set at creation</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Font Size
-                </label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Font Size</label>
                 <select
-                  className="w-full border rounded px-3 py-2 text-sm text-black"
+                  className="w-full border rounded px-2 py-1.5 text-sm text-black"
                   value={fontSize}
                   onChange={(e) => setFontSize(e.target.value as 'default' | 'large')}
                 >
@@ -303,41 +401,29 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
                   <option value="large">Large (+20%)</option>
                 </select>
               </div>
-            </div>
-
-            {/* Second row: Highlight Color and Icon Selection */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Highlight Color
-                </label>
-                <div className="grid grid-cols-5 gap-2">
+                <label className="block text-xs font-medium text-gray-700 mb-1">Highlight</label>
+                <div className="flex gap-1">
                   {bgColorOptions.map((c) => (
                     <button
                       key={c.value}
                       type="button"
                       onClick={() => setBgColor(c.value)}
-                      className={`h-10 border transition-colors ${bgColor === c.value
-                          ? 'border-black ring-2 ring-blue-500'
-                          : 'border-gray-300 hover:border-gray-500'
+                      className={`w-7 h-7 border transition-colors rounded ${bgColor === c.value
+                          ? 'border-blue-500 ring-1 ring-blue-500'
+                          : 'border-gray-300 hover:border-gray-400'
                         }`}
                       style={{ backgroundColor: c.value }}
                       title={c.name}
                     />
                   ))}
                 </div>
-                <p className="text-xs text-gray-600 mt-2">
-                  Selected: {bgColorOptions.find(b => b.value === bgColor)?.name}
-                </p>
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Icon (+₹100)
-                </label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Icon (+₹100)</label>
                 <div className="relative">
                   <select
-                    className="w-full border rounded px-3 py-2 text-sm text-black appearance-none bg-white"
+                    className="w-full border rounded px-2 py-1.5 text-sm text-black appearance-none bg-white pr-8"
                     value={icon || ''}
                     onChange={(e) => setIcon(e.target.value || null)}
                   >
@@ -347,38 +433,29 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
                       </option>
                     ))}
                   </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                    {icon && (
-                      <img
-                        src={`/icon/${icon}.svg`}
-                        alt={`${icon} icon`}
-                        className="w-5 h-5"
-                      />
-                    )}
-                  </div>
+                  {icon && (
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                      <img src={`/icon/${icon}.svg`} alt={icon} className="w-4 h-4" />
+                    </div>
+                  )}
                 </div>
-                <p className="text-xs text-gray-600 mt-2">
-                  Selected: {iconOptions.find(i => i.value === icon)?.name || 'None'}
-                </p>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="border border-gray-300">
-          <div className="px-4 py-3 border-b border-gray-300 bg-gray-50">
+        {/* Ad Content */}
+        <div className="border border-gray-300 rounded">
+          <div className="px-3 py-2 border-b border-gray-300 bg-gray-50">
             <div className="flex justify-between items-center">
-              <h4 className="font-bold text-sm uppercase tracking-wide text-gray-700">Ad Content</h4>
-              <span className={`text-xs font-medium ${currentCharacters > 200 ? 'text-red-600' : 'text-gray-600'
-                }`}>
-                {currentCharacters} characters
-                {currentCharacters > 200 && (
-                  <span className="text-gray-500"> (200 free + {currentCharacters - 200} paid)</span>
-                )}
+              <h4 className="font-bold text-xs uppercase tracking-wide text-gray-700">Ad Content</h4>
+              <span className={`text-xs font-medium ${currentCharacters > 200 ? 'text-red-600' : 'text-gray-600'}`}>
+                {currentCharacters} chars
+                {currentCharacters > 200 && <span className="text-gray-400"> (+{currentCharacters - 200} paid)</span>}
               </span>
             </div>
           </div>
-          <div className="p-4">
+          <div className="p-2">
             <RichTextEditor
               value={content}
               onChange={(html) => {
@@ -389,24 +466,24 @@ function PostEditor({ initial, onSubmit }: { initial: Post | null; onSubmit: (da
               className={currentCharacters > 200 ? 'border-red-300' : ''}
             />
             {currentCharacters > 200 && (
-              <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded">
-                Characters beyond 200 will be charged at ₹500 per 20 characters
+              <div className="mt-1 text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
+                ₹500 per 20 characters beyond 200
               </div>
             )}
           </div>
         </div>
 
-        <div className="flex gap-2 pt-2">
+        <div className="flex gap-2">
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
           >
             {initial ? 'Save Changes' : 'Create Post'}
           </button>
           {initial && (
             <button
               type="button"
-              className="px-3 py-2 border rounded hover:bg-gray-50 transition-colors"
+              className="px-3 py-1.5 border text-sm rounded hover:bg-gray-50 transition-colors text-gray-700"
               onClick={() => window.location.reload()}
             >
               Cancel
