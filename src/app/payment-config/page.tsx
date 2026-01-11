@@ -13,6 +13,8 @@ interface PaymentConfig {
   visibility2WeeksMultiplier: number;
   visibility3WeeksMultiplier: number;
   visibility4WeeksMultiplier: number;
+  iconPrice: number;
+  highlightColorPrice: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -71,14 +73,14 @@ export default function PaymentConfigPage() {
         setSaving(false);
         return;
       }
-      
+
       const { id, createdAt, updatedAt, ...updateData } = config;
-      
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/admin/payment/config`, {
         method: 'PUT',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}` 
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(updateData),
       });
@@ -137,9 +139,8 @@ export default function PaymentConfigPage() {
         </div>
 
         {message && (
-          <div className={`mb-6 p-4 rounded-md ${
-            message.includes('success') ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
-          }`}>
+          <div className={`mb-6 p-4 rounded-md ${message.includes('success') ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
+            }`}>
             {message}
           </div>
         )}
@@ -155,7 +156,7 @@ export default function PaymentConfigPage() {
               {/* Base Pricing */}
               <div className="space-y-4">
                 <h3 className="text-md font-medium text-gray-900">Base Pricing</h3>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     First 200 Characters (₹)
@@ -186,7 +187,7 @@ export default function PaymentConfigPage() {
               {/* Multipliers */}
               <div className="space-y-4">
                 <h3 className="text-md font-medium text-gray-900">Multipliers</h3>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Large Font Multiplier
@@ -246,6 +247,41 @@ export default function PaymentConfigPage() {
                     min="0.1"
                     max="5.0"
                   />
+                </div>
+              </div>
+
+              {/* Add-on Pricing */}
+              <div className="space-y-4 md:col-span-2">
+                <h3 className="text-md font-medium text-gray-900">Add-on Pricing</h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Icon Price (₹)
+                    </label>
+                    <input
+                      type="number"
+                      value={config.iconPrice}
+                      onChange={(e) => handleChange('iconPrice', parseInt(e.target.value))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                      min="0"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Price charged when user selects an icon</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Highlight Color Price (₹)
+                    </label>
+                    <input
+                      type="number"
+                      value={config.highlightColorPrice}
+                      onChange={(e) => handleChange('highlightColorPrice', parseInt(e.target.value))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                      min="0"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Price charged when user selects a background color</p>
+                  </div>
                 </div>
               </div>
             </div>

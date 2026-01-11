@@ -72,17 +72,17 @@ export default function CouponsPage() {
       }
 
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-      const url = editingCoupon 
+      const url = editingCoupon
         ? `${baseUrl}/api/admin/payment/coupons/${editingCoupon.id}`
         : `${baseUrl}/api/admin/payment/coupons`;
-      
+
       const method = editingCoupon ? 'PUT' : 'POST';
-      
+
       const response = await fetch(url, {
         method,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}` 
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
           ...formData,
@@ -194,9 +194,8 @@ export default function CouponsPage() {
         </div>
 
         {message && (
-          <div className={`mb-6 p-4 rounded-md ${
-            message.includes('success') ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
-          }`}>
+          <div className={`mb-6 p-4 rounded-md ${message.includes('success') ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
+            }`}>
             {message}
           </div>
         )}
@@ -231,11 +230,15 @@ export default function CouponsPage() {
                   <input
                     type="number"
                     value={formData.discountPercentage}
-                    onChange={(e) => setFormData({ ...formData, discountPercentage: parseFloat(e.target.value) })}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value);
+                      if (val > 100) return; // Prevent > 100
+                      setFormData({ ...formData, discountPercentage: val });
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
                     min="0"
                     max="100"
-                    step="0.01"
+                    step="0.5"
                     required
                   />
                 </div>
@@ -342,9 +345,8 @@ export default function CouponsPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        coupon.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${coupon.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
                         {coupon.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </td>

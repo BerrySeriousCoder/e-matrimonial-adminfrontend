@@ -1,16 +1,18 @@
+// Using sessionStorage instead of localStorage for security
+// Admin sessions will expire when browser is closed
 export const getAdminToken = (): string | null => {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('adminToken');
+  return sessionStorage.getItem('adminToken');
 };
 
 export const setAdminToken = (token: string): void => {
   if (typeof window === 'undefined') return;
-  localStorage.setItem('adminToken', token);
+  sessionStorage.setItem('adminToken', token);
 };
 
 export const removeAdminToken = (): void => {
   if (typeof window === 'undefined') return;
-  localStorage.removeItem('adminToken');
+  sessionStorage.removeItem('adminToken');
 };
 
 export const isAdminAuthenticated = (): boolean => {

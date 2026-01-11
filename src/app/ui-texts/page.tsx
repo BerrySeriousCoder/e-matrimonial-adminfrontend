@@ -40,7 +40,7 @@ export default function UITextsPage() {
         } else {
           router.push('/');
         }
-      } catch (error) {
+      } catch {
         router.push('/');
       }
     };
@@ -65,7 +65,7 @@ export default function UITextsPage() {
           'Authorization': `Bearer ${token}`,
         },
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setTexts(data.texts);
@@ -102,11 +102,11 @@ export default function UITextsPage() {
 
       if (response.ok) {
         // Update the local state
-        setTexts(prev => prev.map(text => 
+        setTexts(prev => prev.map(text =>
           text.key === key ? { ...text, value: value.trim() } : text
         ));
         // Update original texts to reflect the saved state
-        setOriginalTexts(prev => prev.map(text => 
+        setOriginalTexts(prev => prev.map(text =>
           text.key === key ? { ...text, value: value.trim() } : text
         ));
         // Recalculate if there are any remaining changes
@@ -122,7 +122,7 @@ export default function UITextsPage() {
         const errorData = await response.json();
         setErrors(prev => ({ ...prev, [key]: errorData.error || 'Failed to update' }));
       }
-    } catch (error) {
+    } catch {
       setErrors(prev => ({ ...prev, [key]: 'Network error' }));
     } finally {
       setSaving(prev => ({ ...prev, [key]: false }));
@@ -132,17 +132,17 @@ export default function UITextsPage() {
   const handleInputChange = (key: string, value: string) => {
     // Update the local state immediately for better UX
     setTexts(prev => {
-      const updated = prev.map(text => 
+      const updated = prev.map(text =>
         text.key === key ? { ...text, value } : text
       );
-      
+
       // Check if there are any changes compared to original
       const hasAnyChanges = updated.some(text => {
         const original = originalTexts.find(o => o.key === text.key);
         return original && original.value !== text.value;
       });
       setHasChanges(hasAnyChanges);
-      
+
       return updated;
     });
   };
@@ -236,11 +236,10 @@ export default function UITextsPage() {
                 <button
                   onClick={handleSaveAll}
                   disabled={!hasChanges || saving.all}
-                  className={`px-4 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    hasChanges && !saving.all
+                  className={`px-4 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${hasChanges && !saving.all
                       ? 'bg-blue-600 text-white hover:bg-blue-700'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
+                    }`}
                 >
                   {saving.all ? 'Saving...' : 'Save All Changes'}
                 </button>
@@ -261,22 +260,21 @@ export default function UITextsPage() {
                         <span className="text-xs text-blue-600">Saving...</span>
                       )}
                     </div>
-                    
+
                     <input
                       type="text"
                       value={text.value}
                       onChange={(e) => handleInputChange(text.key, e.target.value)}
                       onKeyPress={(e) => handleKeyPress(e, text.key, e.currentTarget.value)}
-                      className={`w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-600 text-black ${
-                        errors[text.key] ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-600 text-black ${errors[text.key] ? 'border-red-300' : 'border-gray-300'
+                        }`}
                       placeholder="Enter text value"
                     />
-                    
+
                     {errors[text.key] && (
                       <p className="mt-1 text-xs text-red-600">{errors[text.key]}</p>
                     )}
-                    
+
                     <p className="mt-1 text-xs text-gray-500">
                       {text.description}
                     </p>

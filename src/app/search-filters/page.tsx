@@ -72,7 +72,7 @@ export default function SearchFiltersPage() {
           'Authorization': `Bearer ${token}`,
         },
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setSections(data.sections);
@@ -119,7 +119,7 @@ export default function SearchFiltersPage() {
 
   const handleUpdateSection = async (formData: FormData) => {
     if (!editingSection) return;
-    
+
     try {
       const token = getAdminToken();
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/search-filters/sections/${editingSection.id}`, {
@@ -212,7 +212,7 @@ export default function SearchFiltersPage() {
 
   const handleUpdateOption = async (formData: FormData) => {
     if (!editingOption) return;
-    
+
     try {
       const token = getAdminToken();
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/search-filters/options/${editingOption.id}`, {
@@ -341,7 +341,7 @@ export default function SearchFiltersPage() {
           <button onClick={() => setError('')} className="float-right font-bold">&times;</button>
         </div>
       )}
-      
+
       {success && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
           {success}
@@ -379,30 +379,34 @@ export default function SearchFiltersPage() {
                 </button>
               </div>
             </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
               {section.options.map((option) => (
-                <div key={option.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border">
-                  <div>
-                    <span className="text-sm font-medium text-gray-900">{option.displayName}</span>
-                    <span className="ml-2 px-1 py-0.5 rounded text-xs font-medium ${option.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                      {option.isActive ? 'Active' : 'Inactive'}
+                <div key={option.id} className="flex flex-col p-3 bg-gray-50 rounded-lg border hover:border-gray-300 transition-colors">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <span className="text-sm font-medium text-gray-900 truncate flex-1" title={option.displayName}>
+                      {option.displayName}
                     </span>
-                    <div className="text-xs text-gray-500 mt-1">Order: {option.order}</div>
+                    <span className={`flex-shrink-0 px-1.5 py-0.5 rounded text-xs font-medium ${option.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                      {option.isActive ? 'On' : 'Off'}
+                    </span>
                   </div>
-                  <div className="flex space-x-1">
-                    <button
-                      onClick={() => setEditingOption(option)}
-                      className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteOption(option.id)}
-                      className="text-xs text-red-600 hover:text-red-800 font-medium"
-                    >
-                      Del
-                    </button>
+                  <div className="flex items-center justify-between mt-auto">
+                    <span className="text-xs text-gray-500">Order: {option.order}</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setEditingOption(option)}
+                        className="text-xs text-blue-600 hover:text-blue-800 font-medium hover:underline"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteOption(option.id)}
+                        className="text-xs text-red-600 hover:text-red-800 font-medium hover:underline"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -432,13 +436,13 @@ export default function SearchFiltersPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1 text-gray-700">Order</label>
-                  <input 
-                    name="order" 
-                    type="number" 
-                    min="1" 
+                  <input
+                    name="order"
+                    type="number"
+                    min="1"
                     max={getMaxNewSectionOrder()}
-                    defaultValue="1" 
-                    className="w-full border rounded px-3 py-2 text-gray-900" 
+                    defaultValue="1"
+                    className="w-full border rounded px-3 py-2 text-gray-900"
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     Range: 1 to {getMaxNewSectionOrder()}. This determines the display order of sections.
@@ -483,13 +487,13 @@ export default function SearchFiltersPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1 text-gray-700">Order</label>
-                  <input 
-                    name="order" 
-                    type="number" 
-                    min="1" 
+                  <input
+                    name="order"
+                    type="number"
+                    min="1"
                     max={getMaxSectionOrder()}
-                    defaultValue={editingSection.order} 
-                    className="w-full border rounded px-3 py-2 text-gray-900" 
+                    defaultValue={editingSection.order}
+                    className="w-full border rounded px-3 py-2 text-gray-900"
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     Range: 1 to {getMaxSectionOrder()}. Current order: {editingSection.order}
@@ -497,11 +501,11 @@ export default function SearchFiltersPage() {
                 </div>
                 <div>
                   <label className="flex items-center">
-                    <input 
-                      name="isActive" 
-                      type="checkbox" 
-                      defaultChecked={editingSection.isActive} 
-                      className="mr-2" 
+                    <input
+                      name="isActive"
+                      type="checkbox"
+                      defaultChecked={editingSection.isActive}
+                      className="mr-2"
                     />
                     <span className="text-sm font-medium text-gray-700">Active</span>
                   </label>
@@ -533,9 +537,9 @@ export default function SearchFiltersPage() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-1 text-gray-700">Section</label>
-                  <select 
-                    name="sectionId" 
-                    required 
+                  <select
+                    name="sectionId"
+                    required
                     className="w-full border rounded px-3 py-2 text-gray-900"
                     value={selectedSectionId}
                     onChange={(e) => setSelectedSectionId(parseInt(e.target.value) || 0)}
@@ -556,13 +560,13 @@ export default function SearchFiltersPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1 text-gray-700">Order</label>
-                  <input 
-                    name="order" 
-                    type="number" 
-                    min="1" 
+                  <input
+                    name="order"
+                    type="number"
+                    min="1"
                     max={getMaxNewOptionOrder(selectedSectionId)}
-                    defaultValue="1" 
-                    className="w-full border rounded px-3 py-2 text-gray-900" 
+                    defaultValue="1"
+                    className="w-full border rounded px-3 py-2 text-gray-900"
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     Range: 1 to {getMaxNewOptionOrder(selectedSectionId)}. This determines the display order within the section.
@@ -614,13 +618,13 @@ export default function SearchFiltersPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1 text-gray-700">Order</label>
-                  <input 
-                    name="order" 
-                    type="number" 
-                    min="1" 
+                  <input
+                    name="order"
+                    type="number"
+                    min="1"
                     max={getMaxOptionOrder(editingOption.sectionId)}
-                    defaultValue={editingOption.order} 
-                    className="w-full border rounded px-3 py-2 text-gray-900" 
+                    defaultValue={editingOption.order}
+                    className="w-full border rounded px-3 py-2 text-gray-900"
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     Range: 1 to {getMaxOptionOrder(editingOption.sectionId)}. Current order: {editingOption.order}
@@ -628,11 +632,11 @@ export default function SearchFiltersPage() {
                 </div>
                 <div>
                   <label className="flex items-center">
-                    <input 
-                      name="isActive" 
-                      type="checkbox" 
-                      defaultChecked={editingOption.isActive} 
-                      className="mr-2" 
+                    <input
+                      name="isActive"
+                      type="checkbox"
+                      defaultChecked={editingOption.isActive}
+                      className="mr-2"
                     />
                     <span className="text-sm font-medium text-gray-700">Active</span>
                   </label>

@@ -53,7 +53,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           removeAdminToken();
           router.push('/login');
         }
-      } catch (error) {
+      } catch {
         removeAdminToken();
         router.push('/login');
       } finally {
