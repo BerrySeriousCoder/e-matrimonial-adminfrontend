@@ -14,7 +14,21 @@ import {
   getDataEntryPosts,
   createDataEntryPost,
   updateDataEntryPost,
+  getDashboardStats,
+  adminEditPost,
 } from '../lib/api';
+
+// Dashboard Stats
+export const useDashboardStats = () => {
+  const token = getAdminToken();
+
+  return useQuery({
+    queryKey: ['dashboard-stats'],
+    queryFn: () => getDashboardStats(token!),
+    enabled: !!token,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+};
 
 // Posts Queries
 export const useAdminPosts = (params: {
@@ -23,7 +37,7 @@ export const useAdminPosts = (params: {
   page?: number;
 }) => {
   const token = getAdminToken();
-  
+
   return useQuery({
     queryKey: ['admin-posts', params],
     queryFn: () => getAdminPosts(token!, params),
@@ -34,7 +48,7 @@ export const useAdminPosts = (params: {
 
 export const useUpdatePostStatus = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: ({ postId, status, reason }: { postId: number; status: string; reason?: string }) => {
       const token = getAdminToken();
@@ -49,7 +63,7 @@ export const useUpdatePostStatus = () => {
 
 export const useCreateAdminPost = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (data: {
       email: string;
@@ -75,7 +89,7 @@ export const useAdminUsers = (params: {
   page?: number;
 }) => {
   const token = getAdminToken();
-  
+
   return useQuery({
     queryKey: ['admin-users', params],
     queryFn: () => getAdminUsers(token!, params),
@@ -86,7 +100,7 @@ export const useAdminUsers = (params: {
 
 export const useUserPosts = (userId: number) => {
   const token = getAdminToken();
-  
+
   return useQuery({
     queryKey: ['user-posts', userId],
     queryFn: () => getUserPosts(token!, userId),
@@ -103,7 +117,7 @@ export const useAdminLogs = (params: {
   limit?: number;
 }) => {
   const token = getAdminToken();
-  
+
   return useQuery({
     queryKey: ['admin-logs', params],
     queryFn: () => getAdminLogs(token!, params),
@@ -118,7 +132,7 @@ export const useAdminManagement = (params: {
   page?: number;
 }) => {
   const token = getAdminToken();
-  
+
   return useQuery({
     queryKey: ['admin-management', params],
     queryFn: () => getAdminManagement(token!, params),
@@ -129,7 +143,7 @@ export const useAdminManagement = (params: {
 
 export const useCreateAdmin = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (data: { email: string; password: string; role?: 'admin' | 'data_entry' }) => {
       const token = getAdminToken();
@@ -144,7 +158,7 @@ export const useCreateAdmin = () => {
 
 export const useResetAdminPassword = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: ({ adminId, password }: { adminId: number; password: string }) => {
       const token = getAdminToken();
@@ -159,7 +173,7 @@ export const useResetAdminPassword = () => {
 
 export const useDeleteAdmin = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (adminId: number) => {
       const token = getAdminToken();
@@ -175,7 +189,7 @@ export const useDeleteAdmin = () => {
 // Prefetching functions
 export const usePrefetchNextPage = () => {
   const queryClient = useQueryClient();
-  
+
   return {
     prefetchPosts: (params: {
       status?: string;
@@ -225,7 +239,7 @@ export const usePrefetchNextPage = () => {
       });
     },
   };
-}; 
+};
 
 // Data Entry Queries
 export const useDataEntryPosts = (params: { status?: string; search?: string; page?: number }) => {
@@ -260,6 +274,20 @@ export const useUpdateDataEntryPost = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['data-entry-posts'] });
+    },
+  });
+};
+
+// Admin Edit Post (superadmin only)
+export const useAdminEditPost = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ postId, data }: { postId: number; data: { content?: string; lookingFor?: 'bride' | 'groom'; fontSize?: 'default' | 'large'; bgColor?: string; icon?: string | null } }) => {
+      const token = getAdminToken();
+      return adminEditPost(token!, postId, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-posts'] });
     },
   });
 };

@@ -23,8 +23,11 @@ export interface Post {
   fontSize?: 'default' | 'large';
   bgColor?: string;
   icon?: string | null;
-  status: 'pending' | 'published' | 'archived' | 'deleted' | 'expired' | 'edited';
+  status: 'pending' | 'published' | 'archived' | 'deleted' | 'expired' | 'edited' | 'payment_pending';
   createdAt: string;
+  publishedAt?: string;
+  finalAmount?: number;
+  couponCode?: string;
 }
 
 export interface User {
@@ -71,6 +74,14 @@ export const getAdminProfile = async (token: string) => {
   return response.json();
 };
 
+// Dashboard Stats
+export const getDashboardStats = async (token: string) => {
+  const response = await fetch(`${API_URL}/admin/dashboard-stats`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.json();
+};
+
 // Posts Management
 export const getAdminPosts = async (token: string, params: {
   status?: string;
@@ -91,9 +102,9 @@ export const getAdminPosts = async (token: string, params: {
 export const updatePostStatus = async (token: string, postId: number, status: string, reason?: string) => {
   const response = await fetch(`${API_URL}/admin/posts/${postId}/status`, {
     method: 'PUT',
-    headers: { 
+    headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}` 
+      Authorization: `Bearer ${token}`
     },
     body: JSON.stringify({ status, reason }),
   });
@@ -110,9 +121,9 @@ export const createAdminPost = async (token: string, data: {
 }) => {
   const response = await fetch(`${API_URL}/admin/posts`, {
     method: 'POST',
-    headers: { 
+    headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}` 
+      Authorization: `Bearer ${token}`
     },
     body: JSON.stringify(data),
   });
@@ -172,6 +183,25 @@ export const updateDataEntryPost = async (token: string, postId: number, data: {
   return response.json();
 };
 
+// Admin Edit Post (superadmin only)
+export const adminEditPost = async (token: string, postId: number, data: {
+  content?: string;
+  lookingFor?: 'bride' | 'groom';
+  fontSize?: 'default' | 'large';
+  bgColor?: string;
+  icon?: string | null;
+}) => {
+  const response = await fetch(`${API_URL}/admin/posts/${postId}/edit`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(data),
+  });
+  return response.json();
+};
+
 // Users Management
 export const getAdminUsers = async (token: string, params: {
   search?: string;
@@ -185,7 +215,7 @@ export const getAdminUsers = async (token: string, params: {
   const response = await fetch(url.toString(), {
     headers: { Authorization: `Bearer ${token}` },
   });
-  
+
   return response.json();
 };
 
@@ -236,9 +266,9 @@ export const createAdmin = async (token: string, data: {
 }) => {
   const response = await fetch(`${API_URL}/admin/management`, {
     method: 'POST',
-    headers: { 
+    headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}` 
+      Authorization: `Bearer ${token}`
     },
     body: JSON.stringify(data),
   });
@@ -248,9 +278,9 @@ export const createAdmin = async (token: string, data: {
 export const resetAdminPassword = async (token: string, adminId: number, password: string) => {
   const response = await fetch(`${API_URL}/admin/management/${adminId}/password`, {
     method: 'PUT',
-    headers: { 
+    headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}` 
+      Authorization: `Bearer ${token}`
     },
     body: JSON.stringify({ password }),
   });

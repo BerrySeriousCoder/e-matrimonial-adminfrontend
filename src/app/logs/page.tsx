@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
+import {
   MagnifyingGlassIcon,
   FunnelIcon
 } from '@heroicons/react/24/outline';
@@ -108,9 +108,9 @@ export default function LogsPage() {
 
   if (error) {
     return (
-        <div className="text-center text-red-600">
-          Error loading logs. Please try again.
-        </div>
+      <div className="text-center text-red-600">
+        Error loading logs. Please try again.
+      </div>
     );
   }
 
@@ -158,24 +158,22 @@ export default function LogsPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Details
                 </th>
+
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  IP Address
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Timestamp
+                  Timestamp (IST)
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {isLoading ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
                     Loading logs...
                   </td>
                 </tr>
               ) : logs.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
                     No logs found.
                   </td>
                 </tr>
@@ -193,11 +191,9 @@ export default function LogsPage() {
                         {log.details || `${log.entityType} ${log.entityId || ''}`}
                       </div>
                     </td>
+
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {log.ipAddress || 'N/A'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {format(new Date(log.createdAt), 'MMM dd, yyyy HH:mm')}
+                      {format(new Date(log.createdAt), 'MMM dd, yyyy hh:mm a')} IST
                     </td>
                   </tr>
                 ))

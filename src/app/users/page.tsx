@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  MagnifyingGlassIcon,
-  EyeIcon
+import {
+  MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 import { useAdminUsers, useUserPosts, usePrefetchNextPage } from '../../hooks/useAdminQueries';
 import { format } from 'date-fns';
@@ -31,18 +30,6 @@ export default function UsersPage() {
   const users = data?.users || [];
   const totalPages = data?.totalPages || 1;
 
-  // Debug logging
-  useEffect(() => {
-    console.log('UsersPage Debug:', {
-      data,
-      isLoading,
-      error,
-      users: users.length,
-      totalPages,
-      search,
-      currentPage
-    });
-  }, [data, isLoading, error, users.length, totalPages, search, currentPage]);
 
   // Prefetch next page
   useEffect(() => {
@@ -57,21 +44,22 @@ export default function UsersPage() {
   if (error) {
     console.error('UsersPage Error:', error);
     return (
-        <div className="text-center text-red-600">
-          Error loading users. Please try again.
-        </div>
+      <div className="text-center text-red-600">
+        Error loading users. Please try again.
+      </div>
     );
   }
 
   return (
     <>
-      <h2 className="text-2xl font-bold text-gray-900 mb-8">Users Management</h2>
-
-      {/* Debug Info */}
-      <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-        <p className="text-sm text-blue-800">
-          Debug: Loading={isLoading.toString()}, Users={users.length}, Error={error ? 'Yes' : 'No'}
-        </p>
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-2xl font-bold text-gray-900">Users Management</h2>
+        {data?.total !== undefined && (
+          <div className="bg-indigo-50 border border-indigo-200 rounded-lg px-4 py-2">
+            <span className="text-2xl font-bold text-indigo-700">{data.total.toLocaleString()}</span>
+            <span className="text-sm text-indigo-600 ml-2">Total Users</span>
+          </div>
+        )}
       </div>
 
       {/* Filters */}
@@ -112,31 +100,27 @@ export default function UsersPage() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Created
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {isLoading ? (
                     <tr>
-                      <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
+                      <td colSpan={3} className="px-6 py-4 text-center text-gray-500">
                         Loading users...
                       </td>
                     </tr>
                   ) : users.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
+                      <td colSpan={3} className="px-6 py-4 text-center text-gray-500">
                         No users found.
                       </td>
                     </tr>
                   ) : (
                     users.map((user: User) => (
-                      <tr 
+                      <tr
                         key={user.id}
-                        className={`cursor-pointer hover:bg-gray-50 transition-colors ${
-                          selectedUser === user.id ? 'bg-indigo-50' : ''
-                        }`}
+                        className={`cursor-pointer hover:bg-gray-50 transition-colors ${selectedUser === user.id ? 'bg-indigo-50' : ''
+                          }`}
                         onClick={() => setSelectedUser(user.id)}
                       >
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -147,17 +131,6 @@ export default function UsersPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {format(new Date(user.createdAt), 'MMM dd, yyyy')}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedUser(user.id);
-                            }}
-                            className="text-indigo-600 hover:text-indigo-900 transition-colors"
-                          >
-                            <EyeIcon className="h-4 w-4" />
-                          </button>
                         </td>
                       </tr>
                     ))
@@ -218,27 +191,30 @@ export default function UsersPage() {
 
         {/* User Details Sidebar */}
         <div className="lg:col-span-1">
-          <div className="bg-white shadow rounded-lg p-6">
+          <div className="bg-white shadow rounded-lg p-6 sticky top-20 max-h-[80vh] flex flex-col">
             <h3 className="text-lg font-medium text-gray-900 mb-4">User Details</h3>
             {selectedUser && userPostsData?.posts ? (
-              <div>
-                <div className="mb-4">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">User Posts</h4>
-                  <div className="space-y-3">
-                    {userPostsData.posts.map((post: Post) => (
-                      <div key={post.id} className="border rounded-lg p-3">
-                        <div className="text-sm text-gray-900 mb-2">
-                          <strong>Status:</strong> {post.status}
-                        </div>
-                        <div className="text-sm text-gray-600 max-h-32 overflow-y-auto">
-                          <strong>Content:</strong> {stripHtml(post.content)}
-                        </div>
-                        <div className="text-xs text-gray-500 mt-2">
-                          Created: {format(new Date(post.createdAt), 'MMM dd, yyyy')}
-                        </div>
+              <div className="flex flex-col min-h-0">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-medium text-gray-700">User Posts</h4>
+                  <span className="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full">
+                    {userPostsData.posts.length} {userPostsData.posts.length === 1 ? 'post' : 'posts'}
+                  </span>
+                </div>
+                <div className="space-y-3 overflow-y-auto pr-1" style={{ maxHeight: 'calc(80vh - 140px)' }}>
+                  {userPostsData.posts.map((post: Post) => (
+                    <div key={post.id} className="border rounded-lg p-3">
+                      <div className="text-sm text-gray-900 mb-2">
+                        <strong>Status:</strong> {post.status}
                       </div>
-                    ))}
-                  </div>
+                      <div className="text-sm text-gray-600 max-h-32 overflow-y-auto">
+                        <strong>Content:</strong> {stripHtml(post.content)}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-2">
+                        Created: {format(new Date(post.createdAt), 'MMM dd, yyyy')}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             ) : (
